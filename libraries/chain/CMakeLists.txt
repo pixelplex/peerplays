@@ -83,6 +83,7 @@ add_library( graphene_chain
              confidential_evaluator.cpp
              special_authority.cpp
              buyback.cpp
+             voting_balance_evaluator.cpp
 
              account_object.cpp
              asset_object.cpp

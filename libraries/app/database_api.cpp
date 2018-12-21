@@ -87,6 +87,10 @@ class database_api_impl : public std::enable_shared_from_this<database_api_impl>
       map<string,account_id_type> lookup_accounts(const string& lower_bound_name, uint32_t limit)const;
       uint64_t get_account_count()const;
 
+/////////////////////////////////////////////////////////////////////////////////// // voting balance
+      voting_balance_object get_voting_balance( account_id_type owner ) const;
+///////////////////////////////////////////////////////////////////////////////////
+
       // Balances
       vector<asset> get_account_balances(account_id_type id, const flat_set<asset_id_type>& assets)const;
       vector<asset> get_named_account_balances(const std::string& name, const flat_set<asset_id_type>& assets)const;
@@ -523,6 +527,25 @@ vector<optional<account_object>> database_api_impl::get_accounts(const vector<ac
    });
    return result;
 }
+
+//////////////////////////////////////////////////////////////////////////////// // voting balance
+
+voting_balance_object database_api_impl::get_voting_balance( account_id_type owner ) const{
+   const auto& idx = _db.get_index_type<voting_balance_index>().indices().get< graphene::chain::by_owner >();
+   auto iter = idx.find( owner );
+   if( iter != idx.end() ){
+      return *iter;
+   } else {
+      FC_THROW("No voting balance is registered for account!");
+   }
+}
+
+voting_balance_object database_api::get_voting_balance( account_id_type owner ) const
+{
+   return my->get_voting_balance( owner );
+}
+
+////////////////////////////////////////////////////////////////////////////////
 
 std::map<string,full_account> database_api::get_full_accounts( const vector<string>& names_or_ids, bool subscribe )
 {

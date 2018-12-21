@@ -37,6 +37,7 @@
 #include <graphene/chain/vesting_balance_object.hpp>
 #include <graphene/chain/witness_object.hpp>
 #include <graphene/chain/tournament_object.hpp>
+#include <graphene/chain/voting_balance_object.hpp>
 
 #include <graphene/utilities/tempdir.hpp>
 
@@ -153,6 +154,7 @@ void database_fixture::verify_asset_supplies( const database& db )
 {
    //wlog("*** Begin asset supply verification ***");
    const asset_dynamic_data_object& core_asset_data = db.get_core_asset().dynamic_asset_data_id(db);
+   auto& period = db.get_period_object(); // PeerPlays: voting balance
    BOOST_CHECK(core_asset_data.fee_pool == 0);
 
    const simple_index<account_statistics_object>& statistics_index = db.get_index_type<simple_index<account_statistics_object>>();
@@ -208,7 +210,10 @@ void database_fixture::verify_asset_supplies( const database& db )
       total_balances[ vbo.balance.asset_id ] += vbo.balance.amount;
    for( const fba_accumulator_object& fba : db.get_index_type< simple_index< fba_accumulator_object > >() )
       total_balances[ asset_id_type() ] += fba.accumulated_fba_fees;
+   for( const voting_balance_object& vbo : db.get_index_type< voting_balance_index >().indices() )
+      total_balances[ asset_id_type() ] += vbo.accumulate_balance();
 
+   total_balances[ asset_id_type() ] += period.whole_period_budget + period.witness_pool;
    total_balances[asset_id_type()] += db.get_dynamic_global_properties().witness_budget;
 
    for( const auto& item : total_debts )
@@ -1081,6 +1086,174 @@ vector< operation_history_object > database_fixture::get_operation_history( acco
    }
    return result;
 }
+
+////////////////////////////////////////////////////////////////////////////////// // TODO temp
+
+std::vector< account_id_type > database_fixture::create_accounts_with_balances( uint32_t amount, uint32_t test_asset_to_issue ) {
+   std::vector< account_id_type > accounts;
+   BOOST_REQUIRE( amount <= 20 );
+   while( amount-- > 0 ) {
+      trx.operations.clear();
+      std::string salt;
+      salt = static_cast<char>( 'a' + amount );
+      const account_object& account = create_account( "bob" + salt, fc::ecc::private_key::generate().get_public_key() );
+      accounts.push_back( account.get_id() );      
+
+      transfer_operation top;
+      top.from = account_id_type(); // committee_account
+      top.to = account.get_id();
+      top.amount = asset( test_asset_to_issue );
+
+      transaction_evaluation_state context(&db);
+      db.apply_operation( context, top );
+
+      asset acc_balance = db.get_balance( account.get_id(), asset_id_type() );
+      BOOST_CHECK( acc_balance.amount == test_asset_to_issue );
+   }
+   return accounts;
+}
+
+void database_fixture::create_voting_balance( std::vector< account_id_type > accounts, uint32_t test_asset_to_issue ) {
+   const auto& idx = db.get_index_type<voting_balance_index>().indices().get< graphene::chain::by_owner >();
+   BOOST_REQUIRE( idx.size() == 0 );
+   for( auto acc: accounts ) {
+       transaction_evaluation_state context(&db);
+       voting_balance_input_operation voting_input;
+       voting_input.payer = acc;
+       voting_input.owner = acc;
+       voting_input.amount = test_asset_to_issue / 2;
+
+       asset acc_balance = db.get_balance( voting_input.payer, asset_id_type() );
+
+       db.apply_operation( context, voting_input );
+
+       asset diff_balance = acc_balance - db.get_balance( voting_input.payer, asset_id_type() );
+       BOOST_CHECK( diff_balance.amount == test_asset_to_issue / 2 );
+       auto iter = idx.find( acc );
+       BOOST_REQUIRE( iter != idx.end() );
+       BOOST_CHECK( iter->mature_balance == 0 );
+       BOOST_CHECK( iter->immature_balance == test_asset_to_issue / 2 );
+       BOOST_CHECK( iter->voting_coefficient == GRAPHENE_100_PERCENT );
+   }
+   BOOST_REQUIRE( idx.size() == accounts.size() );
+}
+
+void database_fixture::withdraw_all( bool mutured, uint32_t test_asset_to_issue ) {
+   const auto& idx = db.get_index_type<voting_balance_index>().indices().get< graphene::chain::by_owner >();
+   auto iter = idx.begin();
+   while( iter != idx.end() ) {
+       voting_balance_output_operation voting_output;
+       voting_output.owner = iter->owner;
+       voting_output.recipient = iter->owner;
+       voting_output.amount = mutured ? iter->mature_balance : iter->immature_balance;
+
+       transaction_evaluation_state context(&db);
+       db.apply_operation( context, voting_output );
+
+       BOOST_CHECK( db.get_balance( voting_output.owner, asset_id_type() ).amount == test_asset_to_issue || voting_output.owner == account_id_type() );// for committee_account
+       iter = idx.begin();
+   }
+   BOOST_REQUIRE( !idx.size() );
+}
+
+void database_fixture::create_voting_balances( uint32_t amount, bool zero_vot_balance, bool zero_imm_balance, uint32_t salt ) {
+   while( amount-- > 0) {
+      db.create< voting_balance_object >( [&]( voting_balance_object &obj ){
+         obj.mature_balance = zero_vot_balance ? 0 : 100 + share_type( salt + amount );
+         obj.owner = account_id_type( salt + amount );
+         obj.immature_balance = zero_imm_balance ? 0 : share_type( salt + amount );
+         obj.voting_coefficient = GRAPHENE_100_PERCENT;
+         obj.votes_in_period.clear();
+         obj.confirmed_votes = false;
+      });
+
+      auto& period_obj = db.get_period_object();
+      db.modify( period_obj, [&]( period_object& obj ){
+         obj.current_supply += zero_vot_balance ? 0 : 100 + share_type( salt + amount );
+      });
+   }
+}
+
+void database_fixture::set_whole_period_budget( uint32_t amount ) {
+   auto& period_obj = db.get_period_object();
+   db.modify( period_obj, [&]( period_object& obj ){
+      obj.whole_period_budget = share_type( amount );
+   });
+}
+
+void database_fixture::set_account_voting( const voting_balance_object& vb_obj ) {
+   db.modify( vb_obj, [&]( voting_balance_object& obj ){
+      obj.confirmed_votes = true;
+   });
+}
+
+void database_fixture::delete_all_vesting() {
+   const auto& idx = db.get_index_type<voting_balance_index>().indices().get< graphene::chain::by_owner >();
+   auto iter = idx.begin();
+   while( iter != idx.end() ) {
+      db.remove( *iter );
+      iter = idx.begin();
+   }
+}
+
+void database_fixture::create_voting_balance_without_new_block( account_id_type acc, uint32_t amount, bool need_issue, bool make_it_mature ) {
+   if( need_issue ) {
+      transfer_operation top;
+      top.from = account_id_type(); // committee_account
+      top.to = acc;
+      top.amount = asset( amount );
+
+      trx.operations.clear();
+      trx.clear();
+
+      trx.operations.push_back(top);
+      sign( trx,  init_account_priv_key );
+      set_expiration( db, trx );
+      trx.validate();
+      PUSH_TX( db, trx, ~0 );
+
+      trx.operations.clear();
+      trx.clear();
+   }
+   voting_balance_input_operation voting_input;
+   voting_input.payer = acc;
+   voting_input.owner = acc;
+   voting_input.amount = amount;
+
+   trx.operations.clear();
+   trx.clear();
+   
+   trx.operations.push_back(voting_input);
+   sign( trx, init_account_priv_key );
+   set_expiration( db, trx );
+   trx.validate();
+   PUSH_TX( db, trx, ~0 );
+   
+   trx.operations.clear();
+   trx.clear();
+
+   const auto& idx = db.get_index_type<voting_balance_index>().indices().get< graphene::chain::by_owner >();
+   auto iter = idx.find( acc );
+
+   BOOST_CHECK( iter->immature_balance == amount );
+   db._pending_tx_session->merge();
+   db._pending_tx.clear();
+
+   if( make_it_mature ){
+      begin_new_period();
+      BOOST_CHECK( iter->mature_balance == amount );
+   }
+}
+
+void database_fixture::create_voting_balance( account_id_type acc, uint32_t amount, bool need_issue, bool make_it_mature ) {
+   generate_block();
+   create_voting_balance_without_new_block( acc, amount, need_issue, make_it_mature );
+   generate_block();
+   const auto& idx = db.get_index_type<voting_balance_index>().indices().get< graphene::chain::by_owner >();
+   auto iter = idx.find( acc );
+   BOOST_CHECK( iter->mature_balance == amount );
+}
+//////////////////////////////////////////////////////////////////////////////////
 
 namespace test {
 

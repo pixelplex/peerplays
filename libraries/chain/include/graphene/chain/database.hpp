@@ -30,6 +30,7 @@
 #include <graphene/chain/block_database.hpp>
 #include <graphene/chain/genesis_state.hpp>
 #include <graphene/chain/evaluator.hpp>
+#include <graphene/chain/period_object.hpp>
 
 #include <graphene/db/object_database.hpp>
 #include <graphene/db/object.hpp>
@@ -58,6 +59,7 @@ namespace graphene { namespace chain {
     */
    class database : public db::object_database
    {
+      friend struct database_fixture;
       public:
          //////////////////// db_management.cpp ////////////////////
 
@@ -253,6 +255,7 @@ namespace graphene { namespace chain {
          const dynamic_global_property_object&  get_dynamic_global_properties()const;
          const node_property_object&            get_node_properties()const;
          const fee_schedule&                    current_fee_schedule()const;
+         const period_object&                   get_period_object()const;   // PeerPlays: voting balance
 
          uint64_t                               get_random_bits( uint64_t bound );
 
@@ -440,6 +443,8 @@ namespace graphene { namespace chain {
          void update_expired_feeds();
          void update_maintenance_flag( bool new_maintenance_flag );
          void update_withdraw_permissions();
+         void update_period( share_type supply_delta, share_type budget_delta );  //PeerPlays: voting balance
+         std::pair<share_type, share_type> reward_voting_accounts();  //PeerPlays: voting balance
          void update_tournaments();
          bool check_for_blackswan( const asset_object& mia, bool enable_black_swan = true );
 

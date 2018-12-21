@@ -34,6 +34,7 @@
 #include <graphene/chain/special_authority.hpp>
 #include <graphene/chain/special_authority_object.hpp>
 #include <graphene/chain/worker_object.hpp>
+#include <graphene/chain/voting_balance_object.hpp>
 
 #include <algorithm>
 
@@ -267,9 +268,13 @@ void_result account_update_evaluator::do_evaluate( const account_update_operatio
 
    acnt = &o.account(d);
 
-   if( o.new_options.valid() )
+//////////////////////////////////////////////////////////// voting balance
+   if( o.new_options.valid() ) {
+      const auto& voting_index = d.get_index_type< voting_balance_index >().indices().get< graphene::chain::by_owner >();
+      FC_ASSERT( voting_index.find( o.account ) != voting_index.end() );
       verify_account_votes( d, *o.new_options );
-
+   }
+////////////////////////////////////////////////////////////
    return void_result();
 } FC_CAPTURE_AND_RETHROW( (o) ) }
 
@@ -288,7 +293,28 @@ void_result account_update_evaluator::do_apply( const account_update_operation& 
          a.active = *o.active;
          a.top_n_control_flags = 0;
       }
-      if( o.new_options ) a.options = *o.new_options;
+      if( o.new_options ){
+         //////////////////////////////////////////////////////////// voting balance
+         const auto& voting_index = d.get_index_type< voting_balance_index >().indices().get< graphene::chain::by_owner >();
+         auto voting_obj = voting_index.find( o.account );
+         std::vector<vote_id_type> diff;
+
+         std::set_symmetric_difference(o.new_options->votes.begin(), o.new_options->votes.end(),
+                           a.options.votes.begin(), a.options.votes.end(),
+                           std::inserter(diff, diff.end()));
+
+         d.modify( *voting_obj, [&]( voting_balance_object& obj ){
+            for( auto vote: diff ) {
+               if( obj.votes_in_period.find( vote ) != obj.votes_in_period.end() ){
+                  obj.votes_in_period.insert( vote );
+               } else {
+                  obj.votes_in_period.erase( vote );
+               }
+            }
+         });
+         ////////////////////////////////////////////////////////////
+         a.options = *o.new_options;
+      }
       sa_before = a.has_special_authority();
       if( o.extensions.value.owner_special_authority.valid() )
       {

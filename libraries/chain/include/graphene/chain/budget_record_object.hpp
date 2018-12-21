@@ -36,6 +36,7 @@ struct budget_record
    share_type from_initial_reserve = 0;
    share_type from_accumulated_fees = 0;
    share_type from_unused_witness_budget = 0;
+   share_type from_period_witness_pool = 0;
 
    // witness budget requested by the committee
    share_type requested_witness_budget = 0;

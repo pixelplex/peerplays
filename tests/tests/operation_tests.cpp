@@ -500,6 +500,12 @@ BOOST_AUTO_TEST_CASE( update_account )
       const public_key_type key_id = nathan_new_key.get_public_key();
       const auto& active_committee_members = db.get_global_properties().active_committee_members;
 
+      {
+         ///////////////////// // PeerPlays: voting balance
+         // create voting balance for nathan, he will vote in the future
+         create_voting_balance_without_new_block( nathan.get_id(), 5000, true, true );
+      }
+
       transfer(account_id_type()(db), nathan, asset(1000000000));
 
       trx.operations.clear();
@@ -1744,17 +1750,17 @@ BOOST_AUTO_TEST_CASE( witness_pay_test )
    BOOST_CHECK_GT(db.current_fee_schedule().get<account_upgrade_operation>().membership_lifetime_fee, 0);
    // Based on the size of the reserve fund later in the test, the witness budget will be set to this value
    const uint64_t ref_budget =
-      ((uint64_t( db.current_fee_schedule().get<account_upgrade_operation>().membership_lifetime_fee )
+      (((uint64_t( db.current_fee_schedule().get<account_upgrade_operation>().membership_lifetime_fee )
          * GRAPHENE_CORE_ASSET_CYCLE_RATE * 30
          * block_interval
        ) + ((uint64_t(1) << GRAPHENE_CORE_ASSET_CYCLE_RATE_BITS)-1)
-      ) >> GRAPHENE_CORE_ASSET_CYCLE_RATE_BITS
+      ) >> GRAPHENE_CORE_ASSET_CYCLE_RATE_BITS )* 90 * GRAPHENE_1_PERCENT / GRAPHENE_100_PERCENT + 1;
       ;
    // change this if ref_budget changes
-   BOOST_CHECK_EQUAL( ref_budget, 594 );
+   BOOST_CHECK_EQUAL( ref_budget, 535 );
    const uint64_t witness_ppb = ref_budget * 10 / 23 + 1;
    // change this if ref_budget changes
-   BOOST_CHECK_EQUAL( witness_ppb, 259 );
+   BOOST_CHECK_EQUAL( witness_ppb, 233 );
    // following two inequalities need to hold for maximal code coverage
    BOOST_CHECK_LT( witness_ppb * 2, ref_budget );
    BOOST_CHECK_GT( witness_ppb * 3, ref_budget );
@@ -1804,9 +1810,9 @@ BOOST_AUTO_TEST_CASE( witness_pay_test )
 
    schedule_maint();
    // The 80% lifetime referral fee went to the committee account, which burned it. Check that it's here.
-   BOOST_CHECK( core->reserved(db).value == 8000*prec );
+   BOOST_CHECK( core->reserved(db).value == 7200*prec );
    generate_block();
-   BOOST_CHECK_EQUAL( core->reserved(db).value, 999999406 );
+   BOOST_CHECK_EQUAL( core->reserved(db).value, 899999465 );
    BOOST_CHECK_EQUAL( db.get_dynamic_global_properties().witness_budget.value, ref_budget );
    // first witness paid from old budget (so no pay)
    BOOST_CHECK_EQUAL( last_witness_vbo_balance().value, 0 );
@@ -1827,7 +1833,7 @@ BOOST_AUTO_TEST_CASE( witness_pay_test )
    generate_block();
    BOOST_CHECK_EQUAL( last_witness_vbo_balance().value, 0 );
    BOOST_CHECK_EQUAL( db.get_dynamic_global_properties().witness_budget.value, 0 );
-   BOOST_CHECK_EQUAL(core->reserved(db).value, 999999406 );
+   BOOST_CHECK_EQUAL(core->reserved(db).value, 899999465 );
 
 } FC_LOG_AND_RETHROW() }
 

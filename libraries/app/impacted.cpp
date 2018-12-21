@@ -233,6 +233,12 @@ struct get_impacted_account_visitor
    {
       _impacted.insert( op.payout_account_id );
    }
+   void operator()( const voting_balance_input_operation& op ) { // PeerPlays: vesting balance input operation
+      _impacted.insert( op.payer );
+   }
+   void operator()( const voting_balance_output_operation& op ) { // PeerPlays: vesting balance output operation
+      _impacted.insert( op.owner );
+   }
 };
 
 void operation_get_impacted_accounts( const operation& op, flat_set<account_id_type>& result )

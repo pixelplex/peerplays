@@ -496,6 +496,63 @@ void database::update_withdraw_permissions()
       remove(*permit_index.begin());
 }
 
+////////////////////////////////////////////////////////////////////////// // PeerPlays: voting balance
+std::pair<share_type, share_type> database::reward_voting_accounts()
+{
+   share_type supply_delta = 0;
+   share_type budget_delta = 0;
+
+   const auto& period_obj = get_period_object();
+   const auto& gpo = get_global_properties();
+   const auto& vb_idx = get_index_type<voting_balance_index>().indices().get<by_id>();
+
+   auto itr = vb_idx.begin();
+   while( itr != vb_idx.end() )
+   {
+      const voting_balance_object& acc_voting_balance = *itr;
+      itr++;
+
+      modify( acc_voting_balance, [&]( voting_balance_object& obj ){
+         if( acc_voting_balance.is_mature_balance_not_null() ) {
+               if ( obj.is_allowed_to_award() ){
+                  fc::uint128_t acc_award = period_obj.whole_period_budget.value * obj.mature_balance.value * obj.voting_coefficient;
+                  acc_award /= period_obj.current_supply.value * GRAPHENE_100_PERCENT;
+                  budget_delta += share_type(acc_award.to_uint64());
+                  obj.deposit_award( share_type(acc_award.to_uint64()) );
+                  obj.voting_coefficient = GRAPHENE_100_PERCENT;
+               }
+               else{
+                  obj.decrease_coefficient( gpo.parameters.voting_coefficient_reduction );
+               }
+
+               obj.votes_in_period.clear();
+               obj.confirmed_votes = false;
+         }
+         if( acc_voting_balance.is_immature_balance_not_null() ) {
+               supply_delta += obj.immature_balance;
+               obj.update_mature_balance();
+         }
+      });
+   }
+   return std::make_pair( supply_delta, budget_delta );
+}
+
+void database::update_period( share_type supply_delta, share_type budget_delta )
+{
+   const auto& period_obj = get_period_object();
+   const auto& gpo = get_global_properties();
+   auto next_period_end_time = period_obj.end_time;
+   auto y = (head_block_time() - period_obj.end_time).to_seconds() / gpo.parameters.period_interval;
+   next_period_end_time += (y+1) * gpo.parameters.period_interval;
+
+   modify( period_obj, [&]( period_object& obj ){
+      obj.end_time = next_period_end_time;
+      obj.current_supply += supply_delta + budget_delta;
+      obj.witness_pool = obj.whole_period_budget - budget_delta;
+      obj.whole_period_budget = 0;
+   });
+}
+//////////////////////////////////////////////////////////////////////////
 uint64_t database::get_random_bits( uint64_t bound )
 {
    return _random_number_generator(bound);

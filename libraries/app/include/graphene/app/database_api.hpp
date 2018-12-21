@@ -41,7 +41,9 @@
 #include <graphene/chain/worker_object.hpp>
 #include <graphene/chain/witness_object.hpp>
 #include <graphene/chain/tournament_object.hpp>
-
+/////////////////////////////////////////////////////////////// // PeerPlays: voting balance
+#include <graphene/chain/voting_balance_object.hpp>
+///////////////////////////////////////////////////////////////
 #include <graphene/market_history/market_history_plugin.hpp>
 
 #include <fc/api.hpp>
@@ -240,6 +242,10 @@ class database_api
       std::map<string,full_account> get_full_accounts( const vector<string>& names_or_ids, bool subscribe );
 
       optional<account_object> get_account_by_name( string name )const;
+
+///////////////////////////////////////////////////////////////////////////////// // voting balance
+      voting_balance_object get_voting_balance( account_id_type owner ) const;
+/////////////////////////////////////////////////////////////////////////////////
 
       /**
        *  @return all accounts that referr to the key or account id in their owner or active authorities.
@@ -624,6 +630,9 @@ FC_API(graphene::app::database_api,
    (lookup_account_names)
    (lookup_accounts)
    (get_account_count)
+///////////////////////////////////// // voting balance
+   (get_voting_balance)
+/////////////////////////////////////
 
    // Balances
    (get_account_balances)

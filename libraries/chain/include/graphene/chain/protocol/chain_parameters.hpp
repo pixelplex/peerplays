@@ -57,6 +57,7 @@ namespace graphene { namespace chain {
       uint16_t                reserve_percent_of_fee              = GRAPHENE_DEFAULT_BURN_PERCENT_OF_FEE; ///< the percentage of the network's allocation of a fee that is taken out of circulation
       uint16_t                network_percent_of_fee              = GRAPHENE_DEFAULT_NETWORK_PERCENT_OF_FEE; ///< percent of transaction fees paid to network
       uint16_t                lifetime_referrer_percent_of_fee    = GRAPHENE_DEFAULT_LIFETIME_REFERRER_PERCENT_OF_FEE; ///< percent of transaction fees paid to network
+      uint16_t                voting_account_percent_of_fee       = GRAPHENE_DEFAULT_VOTING_ACCOUNT_PERCENT_OF_FEE; ///< percent of transaction fees paid to account's voting_balance
       uint32_t                cashback_vesting_period_seconds     = GRAPHENE_DEFAULT_CASHBACK_VESTING_PERIOD_SEC; ///< time after cashback rewards are accrued before they become liquid
       share_type              cashback_vesting_threshold          = GRAPHENE_DEFAULT_CASHBACK_VESTING_THRESHOLD; ///< the maximum cashback that can be received without vesting
       bool                    count_non_member_votes              = true; ///< set to false to restrict voting privlegages to member accounts
@@ -69,6 +70,8 @@ namespace graphene { namespace chain {
       uint16_t                accounts_per_fee_scale              = GRAPHENE_DEFAULT_ACCOUNTS_PER_FEE_SCALE; ///< number of accounts between fee scalings
       uint8_t                 account_fee_scale_bitshifts         = GRAPHENE_DEFAULT_ACCOUNT_FEE_SCALE_BITSHIFTS; ///< number of times to left bitshift account registration fee at each scaling
       uint8_t                 max_authority_depth                 = GRAPHENE_MAX_SIG_CHECK_DEPTH;
+      uint32_t                period_interval                     = GRAPHENE_DEFAULT_PERIOD_INTERVAL; // PeerPlays: voting balance
+      uint16_t                voting_coefficient_reduction        = GRAPHENE_DEFAULT_COEFFICIENT_REDUCTION; // PeerPlays: voting balance
       //uint8_t                 witness_schedule_algorithm          = GRAPHENE_WITNESS_SHUFFLED_ALGORITHM; ///< 0 shuffled, 1 scheduled
       uint8_t                 witness_schedule_algorithm          = GRAPHENE_WITNESS_SCHEDULED_ALGORITHM; ///< 0 shuffled, 1 scheduled
       /* rps tournament parameters constraints */
@@ -111,6 +114,7 @@ FC_REFLECT( graphene::chain::chain_parameters,
             (reserve_percent_of_fee)
             (network_percent_of_fee)
             (lifetime_referrer_percent_of_fee)
+            (voting_account_percent_of_fee)
             (cashback_vesting_period_seconds)
             (cashback_vesting_threshold)
             (count_non_member_votes)
@@ -122,6 +126,8 @@ FC_REFLECT( graphene::chain::chain_parameters,
             (accounts_per_fee_scale)
             (account_fee_scale_bitshifts)
             (max_authority_depth)
+            (period_interval)
+            (voting_coefficient_reduction)
             (witness_schedule_algorithm)
             (min_round_delay)
             (max_round_delay)

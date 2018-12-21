@@ -138,6 +138,7 @@ namespace graphene { namespace chain {
       tournament_details_object_type,
       match_object_type,
       game_object_type,
+      voting_balance_object_type, // PeerPlays: voting balance
       OBJECT_TYPE_COUNT ///< Sentry value which contains the number of different object types
    };
 
@@ -162,7 +163,8 @@ namespace graphene { namespace chain {
       impl_fba_accumulator_object_type,
       impl_asset_dividend_data_type,
       impl_pending_dividend_payout_balance_for_holder_object_type,
-      impl_distributed_dividend_balance_data_type
+      impl_distributed_dividend_balance_data_type,
+      impl_period_object_type // PeerPlays: voting balance
    };
 
    //typedef fc::unsigned_int            object_id_type;
@@ -186,11 +188,12 @@ namespace graphene { namespace chain {
    class tournament_details_object;
    class match_object;
    class game_object;
+   class voting_balance_object; // PeerPlays: voting balance
 
    typedef object_id< protocol_ids, account_object_type,            account_object>               account_id_type;
    typedef object_id< protocol_ids, asset_object_type,              asset_object>                 asset_id_type;
    typedef object_id< protocol_ids, force_settlement_object_type,   force_settlement_object>      force_settlement_id_type;
-   typedef object_id< protocol_ids, committee_member_object_type,           committee_member_object>              committee_member_id_type;
+   typedef object_id< protocol_ids, committee_member_object_type,   committee_member_object>      committee_member_id_type;
    typedef object_id< protocol_ids, witness_object_type,            witness_object>               witness_id_type;
    typedef object_id< protocol_ids, limit_order_object_type,        limit_order_object>           limit_order_id_type;
    typedef object_id< protocol_ids, call_order_object_type,         call_order_object>            call_order_id_type;
@@ -205,6 +208,7 @@ namespace graphene { namespace chain {
    typedef object_id< protocol_ids, tournament_details_object_type, tournament_details_object>    tournament_details_id_type;
    typedef object_id< protocol_ids, match_object_type,              match_object>                 match_id_type;
    typedef object_id< protocol_ids, game_object_type,               game_object>                  game_id_type;
+   typedef object_id< protocol_ids, voting_balance_object_type,      voting_balance_object>       voting_balance_id_type; // PeerPlays: voting balance
 
    // implementation types
    class global_property_object;
@@ -225,6 +229,7 @@ namespace graphene { namespace chain {
    class tournament_details_object;
    class asset_dividend_data_object;
    class pending_dividend_payout_balance_for_holder_object;
+   class period_object; // PeerPlays: voting balance
 
    typedef object_id< implementation_ids, impl_global_property_object_type,  global_property_object>                    global_property_id_type;
    typedef object_id< implementation_ids, impl_dynamic_global_property_object_type,  dynamic_global_property_object>    dynamic_global_property_id_type;
@@ -247,6 +252,7 @@ namespace graphene { namespace chain {
    typedef object_id< implementation_ids, impl_special_authority_object_type, special_authority_object >                special_authority_id_type;
    typedef object_id< implementation_ids, impl_buyback_object_type, buyback_object >                                    buyback_id_type;
    typedef object_id< implementation_ids, impl_fba_accumulator_object_type, fba_accumulator_object >                    fba_accumulator_id_type;
+   typedef object_id< implementation_ids, impl_period_object_type, period_object >                                      period_id_type; // PeerPlays: voting balance
 
    typedef fc::array<char, GRAPHENE_MAX_ASSET_SYMBOL_LENGTH>    symbol_type;
    typedef fc::ripemd160                                        block_id_type;
@@ -365,6 +371,7 @@ FC_REFLECT_ENUM( graphene::chain::object_type,
                  (tournament_details_object_type)
                  (match_object_type)
                  (game_object_type)
+                 (voting_balance_object_type) // PeerPlays: voting balance
                  (OBJECT_TYPE_COUNT)
                )
 FC_REFLECT_ENUM( graphene::chain::impl_object_type,
@@ -388,6 +395,7 @@ FC_REFLECT_ENUM( graphene::chain::impl_object_type,
                  (impl_asset_dividend_data_type)
                  (impl_pending_dividend_payout_balance_for_holder_object_type)
                  (impl_distributed_dividend_balance_data_type)
+                 (impl_period_object_type) // PeerPlays: voting balance
                )
 
 FC_REFLECT_TYPENAME( graphene::chain::share_type )
@@ -421,6 +429,8 @@ FC_REFLECT_TYPENAME( graphene::chain::special_authority_id_type )
 FC_REFLECT_TYPENAME( graphene::chain::buyback_id_type )
 FC_REFLECT_TYPENAME( graphene::chain::fba_accumulator_id_type )
 FC_REFLECT_TYPENAME( graphene::chain::tournament_details_id_type )
+FC_REFLECT_TYPENAME( graphene::chain::period_id_type ) // PeerPlays: voting balance
+FC_REFLECT_TYPENAME( graphene::chain::voting_balance_id_type ) // PeerPlays: voting balance
 
 FC_REFLECT( graphene::chain::void_t, )
 

@@ -5046,6 +5046,45 @@ order_book wallet_api::get_order_book( const string& base, const string& quote, 
    return( my->_remote_db->get_order_book( base, quote, limit ) );
 }
 
+///////////////////////////////////////////////////////////////////////////////// // PeerPlays: voting balance
+signed_transaction wallet_api::add_to_voting_balance(account_id_type owner, account_id_type payer, uint64_t amount, bool broadcast) const
+{
+   FC_ASSERT( !is_locked() );
+   voting_balance_input_operation voting_input;
+   voting_input.payer = payer;
+   voting_input.owner = owner;
+   voting_input.amount = share_type(amount);
+
+   signed_transaction tx;
+   tx.operations = { voting_input };
+   my->set_operation_fees( tx, my->_remote_db->get_global_properties().parameters.current_fees );
+   tx.validate();
+
+   return my->sign_transaction( tx, broadcast );
+}
+
+signed_transaction wallet_api::withdraw_voting_balance(account_id_type owner, account_id_type recipient, uint64_t amount, bool broadcast) const
+{
+   FC_ASSERT( !is_locked() );
+   voting_balance_output_operation voting_output;
+   voting_output.owner = owner;
+   voting_output.recipient = recipient;
+   voting_output.amount = share_type(amount);
+
+   signed_transaction tx;
+   tx.operations = { voting_output };
+   my->set_operation_fees( tx, my->_remote_db->get_global_properties().parameters.current_fees );
+   tx.validate();
+
+   return my->sign_transaction( tx, broadcast );
+}
+
+voting_balance_object wallet_api::get_voting_balance(account_id_type owner) const
+{
+   return my->_remote_db->get_voting_balance( owner );
+}
+/////////////////////////////////////////////////////////////////////////////////
+
 signed_block_with_info::signed_block_with_info( const signed_block& block )
    : signed_block( block )
 {

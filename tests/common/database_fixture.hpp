@@ -36,6 +36,9 @@ using namespace graphene::db;
 
 extern uint32_t GRAPHENE_TESTING_GENESIS_TIMESTAMP;
 
+///////////// // PeerPlays: voting balance
+const uint32_t TEST_ASSET_TO_ISSUE = 1000;
+
 #define PUSH_TX \
    graphene::chain::test::_push_transaction
 
@@ -284,6 +287,27 @@ struct database_fixture {
                                                account_id_type dividend_holder_account_id, 
                                                asset_id_type dividend_payout_asset_type) const;
    vector< operation_history_object > get_operation_history( account_id_type account_id )const;
+   ////////////////////////////////////////////////// // TODO temp
+
+   void begin_new_period(){
+      auto result = db.reward_voting_accounts();
+      db.update_period( result.first, result.second );
+   }
+
+   std::vector< account_id_type > create_accounts_with_balances( uint32_t amount, uint32_t test_asset_to_issue = TEST_ASSET_TO_ISSUE );
+   void create_voting_balance( std::vector< account_id_type > accounts, uint32_t test_asset_to_issue = TEST_ASSET_TO_ISSUE );
+   void withdraw_all( bool mutured = false, uint32_t test_asset_to_issue = TEST_ASSET_TO_ISSUE );
+
+   void create_voting_balances( uint32_t amount, bool zero_vot_balance = false, bool zero_imm_balance = false, uint32_t salt = 0 );
+   void set_whole_period_budget( uint32_t amount );
+   void set_account_voting( const voting_balance_object& vb_obj );
+   void delete_all_vesting();
+
+   void create_voting_balance( account_id_type acc, uint32_t amount, bool need_issue = false, bool make_it_muture = false );
+   void create_voting_balance_without_new_block( account_id_type acc, uint32_t amount, bool need_issue = false, bool make_it_muture = false );
+
+   void clear_pending_tx() {  db._pending_tx.clear();}
+   //////////////////////////////////////////////////
 };
 
 namespace test {

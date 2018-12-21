@@ -49,6 +49,7 @@
 #include <graphene/chain/tournament_object.hpp>
 #include <graphene/chain/match_object.hpp>
 #include <graphene/chain/game_object.hpp>
+#include <graphene/chain/voting_balance_object.hpp> // PeerPlays: voting balance object
 
 #include <graphene/chain/account_evaluator.hpp>
 #include <graphene/chain/asset_evaluator.hpp>
@@ -65,6 +66,7 @@
 #include <graphene/chain/witness_evaluator.hpp>
 #include <graphene/chain/worker_evaluator.hpp>
 #include <graphene/chain/tournament_evaluator.hpp>
+#include <graphene/chain/voting_balance_evaluator.hpp> // PeerPlays: voting balance operation
 
 #include <graphene/chain/protocol/fee_schedule.hpp>
 
@@ -180,6 +182,8 @@ void database::initialize_evaluators()
    register_evaluator<tournament_join_evaluator>();
    register_evaluator<game_move_evaluator>();
    register_evaluator<tournament_leave_evaluator>();
+   register_evaluator<voting_balance_input_evaluator>();  // PeerPlays: voting balance input operation
+   register_evaluator<voting_balance_output_evaluator>(); // PeerPlays: voting balance output operation
 }
 
 void database::initialize_indexes()
@@ -195,6 +199,7 @@ void database::initialize_indexes()
    acnt_index->add_secondary_index<account_member_index>();
    acnt_index->add_secondary_index<account_referrer_index>();
 
+   add_index< primary_index< voting_balance_index > >(); // PeerPlays: voting balance
    add_index< primary_index<committee_member_index> >();
    add_index< primary_index<witness_index> >();
    add_index< primary_index<limit_order_index > >();
@@ -230,6 +235,7 @@ void database::initialize_indexes()
    add_index< primary_index<simple_index<budget_record_object           > > >();
    add_index< primary_index< special_authority_index                      > >();
    add_index< primary_index< buyback_index                                > >();
+   add_index< primary_index<simple_index<period_object                   >> >(); // PeerPlays: voting balance
 
    add_index< primary_index< simple_index< fba_accumulator_object       > > >();
    add_index< primary_index<pending_dividend_payout_balance_for_holder_object_index > >();
@@ -466,6 +472,13 @@ void database::init_genesis(const genesis_state_type& genesis_state)
       p.dynamic_flags = 0;
       p.witness_budget = 0;
       p.recent_slots_filled = fc::uint128::max_value();
+   });
+   // PeerPlays: Create period_object
+   create<period_object>([&](period_object& p) {
+      p.end_time = genesis_state.initial_timestamp + GRAPHENE_DEFAULT_PERIOD_INTERVAL;
+      p.current_supply = 0;
+      p.whole_period_budget = 0;
+      p.witness_pool = 0;
    });
 
    FC_ASSERT( (genesis_state.immutable_parameters.min_witness_count & 1) == 1, "min_witness_count must be odd" );

@@ -171,6 +171,7 @@ namespace graphene { namespace chain {
       FC_ASSERT( reserve_percent_of_fee <= GRAPHENE_100_PERCENT );
       FC_ASSERT( network_percent_of_fee <= GRAPHENE_100_PERCENT );
       FC_ASSERT( lifetime_referrer_percent_of_fee <= GRAPHENE_100_PERCENT );
+      FC_ASSERT( voting_account_percent_of_fee <= GRAPHENE_100_PERCENT ); //PeerPlays: voting balance
       FC_ASSERT( network_percent_of_fee + lifetime_referrer_percent_of_fee <= GRAPHENE_100_PERCENT );
 
       FC_ASSERT( block_interval >= GRAPHENE_MIN_BLOCK_INTERVAL );
@@ -193,7 +194,9 @@ namespace graphene { namespace chain {
                  "Rake fee percentage must not be less than ${min}", ("min",TOURNAMENT_MINIMAL_RAKE_FEE_PERCENTAGE));
       FC_ASSERT( rake_fee_percentage <= TOURNAMENT_MAXIMAL_RAKE_FEE_PERCENTAGE,
                  "Rake fee percentage must not be greater than ${max}", ("max", TOURNAMENT_MAXIMAL_RAKE_FEE_PERCENTAGE));
-
+      FC_ASSERT( period_interval >= maintenance_interval );   //PeerPlays: voting balance
+      FC_ASSERT( voting_coefficient_reduction > GRAPHENE_1_PERCENT );   //PeerPlays: voting balance
+      FC_ASSERT( voting_coefficient_reduction < 50 * GRAPHENE_1_PERCENT );   //PeerPlays: voting balance
    }
 
 } } // graphene::chain

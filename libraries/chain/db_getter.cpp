@@ -57,6 +57,11 @@ const fee_schedule&  database::current_fee_schedule()const
    return get_global_properties().parameters.current_fees;
 }
 
+const period_object& database::get_period_object()const // PeerPlays: voting blance
+{
+   return get( period_id_type() );
+}
+
 time_point_sec database::head_block_time()const
 {
    return get( dynamic_global_property_id_type() ).time;

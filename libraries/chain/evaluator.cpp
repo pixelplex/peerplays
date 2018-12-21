@@ -96,10 +96,20 @@ database& generic_evaluator::db()const { return trx_state->db(); }
    { try {
       if( !trx_state->skip_fee ) {
          database& d = db();
+////////////////////////////////////////////////////////////////////////// // PeerPlays: voting balance
+         auto& period = d.get_period_object();
+         auto voting_cut = cut_fee( core_fee_paid, d.get_global_properties().parameters.voting_account_percent_of_fee );
+         auto fee_paid = core_fee_paid - voting_cut;
+
+         d.modify(period, [&](period_object& obj)
+         {
+            obj.whole_period_budget += voting_cut;
+         });
+//////////////////////////////////////////////////////////////////////////
          /// TODO: db().pay_fee( account_id, core_fee );
          d.modify(*fee_paying_account_statistics, [&](account_statistics_object& s)
          {
-            s.pay_fee( core_fee_paid, d.get_global_properties().parameters.cashback_vesting_threshold );
+            s.pay_fee( fee_paid, d.get_global_properties().parameters.cashback_vesting_threshold );
          });
       }
    } FC_CAPTURE_AND_RETHROW() }

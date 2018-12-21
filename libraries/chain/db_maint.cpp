@@ -327,12 +327,14 @@ void database::update_active_committee_members()
 void database::initialize_budget_record( fc::time_point_sec now, budget_record& rec )const
 {
    const dynamic_global_property_object& dpo = get_dynamic_global_properties();
+   const auto& period = get_period_object(); // PeerPlays: voting balance
    const asset_object& core = asset_id_type(0)(*this);
    const asset_dynamic_data_object& core_dd = core.dynamic_asset_data_id(*this);
 
    rec.from_initial_reserve = core.reserved(*this);
    rec.from_accumulated_fees = core_dd.accumulated_fees;
    rec.from_unused_witness_budget = dpo.witness_budget;
+   rec.from_period_witness_pool = period.witness_pool;  // PeerPlays: voting balance
 
    if(    (dpo.last_budget_time == fc::time_point_sec())
        || (now <= dpo.last_budget_time) )
@@ -354,6 +356,7 @@ void database::initialize_budget_record( fc::time_point_sec now, budget_record& 
    // Similarly, we consider leftover witness_budget to be burned
    // at the BEGINNING of the maintenance interval.
    reserve += dpo.witness_budget;
+   reserve += period.witness_pool;  // PeerPlays: voting balance
 
    fc::uint128_t budget_u128 = reserve.value;
    budget_u128 *= uint64_t(dt);
@@ -380,6 +383,7 @@ void database::process_budget()
    try
    {
       const global_property_object& gpo = get_global_properties();
+      const auto& period = get_period_object();  // PeerPlays: voting balance
       const dynamic_global_property_object& dpo = get_dynamic_global_properties();
       const asset_dynamic_data_object& core =
          asset_id_type(0)(*this).dynamic_asset_data_id(*this);
@@ -434,7 +438,8 @@ void database::process_budget()
          + rec.worker_budget
          - rec.leftover_worker_funds
          - rec.from_accumulated_fees
-         - rec.from_unused_witness_budget;
+         - rec.from_unused_witness_budget
+         - rec.from_period_witness_pool; // PeerPlays: voting balance
 
       modify(core, [&]( asset_dynamic_data_object& _core )
       {
@@ -446,8 +451,14 @@ void database::process_budget()
                                  - leftover_worker_funds
                                  - _core.accumulated_fees
                                  - dpo.witness_budget
+                                 - period.witness_pool // PeerPlays: voting balance
                                 );
          _core.accumulated_fees = 0;
+      });
+
+      modify(period, [&]( period_object& per )  // PeerPlays: voting balance
+      {
+         per.witness_pool = 0;
       });
 
       modify(dpo, [&]( dynamic_global_property_object& _dpo )
@@ -1254,15 +1265,22 @@ void database::perform_chain_maintenance(const signed_block& next_block, const g
 
             const account_object& opinion_account = *opinion_account_ptr;
 
-            const auto& stats = stake_account.statistics(d);
-            uint64_t voting_stake = stats.total_core_in_orders.value
-                  + (stake_account.cashback_vb.valid() ? (*stake_account.cashback_vb)(d).balance.amount.value: 0)
-                  + d.get_balance(stake_account.get_id(), asset_id_type()).amount.value;
+////////////////////////////////////////////////////////////////////////////////////////////////////////// PeerPlays: voting balance
+            const auto& voting_index = d.get_index_type< voting_balance_index >().indices().get< graphene::chain::by_owner >();
+            auto voting_obj = voting_index.find( stake_account.get_id() );
 
-            auto itr = vesting_amounts.find(stake_account.id);
-            if (itr != vesting_amounts.end())
-                voting_stake += itr->second.value;
+            uint64_t voting_stake = 0;
+            if( voting_obj != voting_index.end() ) {
+               voting_stake = static_cast< uint64_t >( voting_obj->mature_balance.value ); // voting_obj->mature_balance.value - int64_t, but voting_stake - uint64_t
 
+               d.modify( *voting_obj, [&]( voting_balance_object& obj ){
+                  if( obj.votes_in_period.size() ) {
+                     obj.votes_in_period.clear();
+                     obj.confirmed_votes = true;
+                  }
+               });
+            }
+//////////////////////////////////////////////////////////////////////////////////////////////////////////
             for( vote_id_type id : opinion_account.options.votes )
             {
                uint32_t offset = id.instance();

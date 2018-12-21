@@ -96,6 +96,9 @@
 #define GRAPHENE_DEFAULT_COMMITTEE_PROPOSAL_REVIEW_PERIOD_SEC (60*60*24*7*2) // Two weeks
 #define GRAPHENE_DEFAULT_NETWORK_PERCENT_OF_FEE               (20*GRAPHENE_1_PERCENT)
 #define GRAPHENE_DEFAULT_LIFETIME_REFERRER_PERCENT_OF_FEE     (30*GRAPHENE_1_PERCENT)
+///////////////////////////////////////////////////////////////// PeerPlays: voting balance
+#define GRAPHENE_DEFAULT_VOTING_ACCOUNT_PERCENT_OF_FEE                (10*GRAPHENE_1_PERCENT)
+/////////////////////////////////////////////////////////////////
 #define GRAPHENE_DEFAULT_MAX_BULK_DISCOUNT_PERCENT            (50*GRAPHENE_1_PERCENT)
 #define GRAPHENE_DEFAULT_BULK_DISCOUNT_THRESHOLD_MIN          ( GRAPHENE_BLOCKCHAIN_PRECISION*int64_t(1000) )
 #define GRAPHENE_DEFAULT_BULK_DISCOUNT_THRESHOLD_MAX          ( GRAPHENE_DEFAULT_BULK_DISCOUNT_THRESHOLD_MIN*int64_t(100) )
@@ -112,6 +115,11 @@
 #define GRAPHENE_MAX_WORKER_NAME_LENGTH                       63
 
 #define GRAPHENE_MAX_URL_LENGTH                               127
+
+///////////////////////////////////////////////////////////////// PeerPlays: voting balance
+#define GRAPHENE_DEFAULT_PERIOD_INTERVAL                      (60*60*24*3)
+#define GRAPHENE_DEFAULT_COEFFICIENT_REDUCTION                (10*GRAPHENE_1_PERCENT)
+/////////////////////////////////////////////////////////////////
 
 #define GRAPHENE_WITNESS_SHUFFLED_ALGORITHM                   0
 #define GRAPHENE_WITNESS_SCHEDULED_ALGORITHM                  1

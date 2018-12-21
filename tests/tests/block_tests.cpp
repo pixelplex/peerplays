@@ -674,6 +674,11 @@ BOOST_FIXTURE_TEST_CASE( maintenance_interval, database_fixture )
       BOOST_CHECK_GT(maintenence_time.sec_since_epoch(), db.head_block_time().sec_since_epoch());
       auto initial_properties = db.get_global_properties();
       const account_object& nathan = create_account("nathan");
+      {
+         ///////////////////// // PeerPlays: voting balance
+         // create voting balance for nathan, he will vote in the future
+         create_voting_balance_without_new_block( nathan.get_id(), 5000, true, true );
+      }
       upgrade_to_lifetime_member(nathan);
       const committee_member_object nathans_committee_member = create_committee_member(nathan);
       {
@@ -686,6 +691,7 @@ BOOST_FIXTURE_TEST_CASE( maintenance_interval, database_fixture )
          trx.operations.clear();
       }
       transfer(account_id_type()(db), nathan, asset(5000));
+      clear_pending_tx(); // to avoid assertion exception while generation blocks ( !account->is_lifetime_member() )
 
       generate_blocks(maintenence_time - initial_properties.parameters.block_interval);
       BOOST_CHECK_EQUAL(db.get_global_properties().parameters.maximum_transaction_size,

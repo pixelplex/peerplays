@@ -28,6 +28,7 @@
 #include <graphene/chain/asset_object.hpp>
 #include <graphene/chain/market_object.hpp>
 #include <graphene/chain/vesting_balance_object.hpp>
+#include <graphene/chain/voting_balance_object.hpp>
 #include <graphene/chain/witness_object.hpp>
 
 namespace graphene { namespace chain {
@@ -79,6 +80,9 @@ void database::debug_dump()
       total_balances[asset_id_type()] += asset_obj.dynamic_asset_data_id(db).fee_pool;
 //      edump((total_balances[asset_obj.id])(asset_obj.dynamic_asset_data_id(db).current_supply ) );
    }
+   for( const voting_balance_object& vbo : db.get_index_type< voting_balance_index >().indices() ) // PeerPlays: voting balance
+      total_balances[ asset_id_type() ] += vbo.accumulate_balance();
+
 
    if( total_balances[asset_id_type()].value != core_asset_data.current_supply.value )
    {

@@ -510,6 +510,7 @@ void database::_apply_block( const signed_block& next_block )
 
    const witness_object& signing_witness = validate_block_header(skip, next_block);
    const auto& global_props = get_global_properties();
+   const auto& period_obj = get_period_object(); // PeerPlays: voting balance
    const auto& dynamic_global_props = get<dynamic_global_property_object>(dynamic_global_property_id_type());
    bool maint_needed = (dynamic_global_props.next_maintenance_time <= next_block.timestamp);
 
@@ -538,6 +539,12 @@ void database::_apply_block( const signed_block& next_block )
    if( maint_needed )
       perform_chain_maintenance(next_block, global_props);
 
+////////////////////////////////////////////////////////////////////////// // PeerPlays: voting balance
+   if( period_obj.end_time <= next_block.timestamp ){
+      auto result = reward_voting_accounts();
+      update_period( result.first, result.second );
+   }
+//////////////////////////////////////////////////////////////////////////
    create_block_summary(next_block);
    clear_expired_transactions();
    clear_expired_proposals();

@@ -262,6 +262,8 @@ namespace graphene { namespace chain {
          account_id_type get_id()const { return id; }
    };
 
+   share_type cut_fee(share_type a, uint16_t p);
+
    /**
     *  @brief This secondary index will allow a reverse lookup of all accounts that a particular key or account
     *  is an potential signing authority.

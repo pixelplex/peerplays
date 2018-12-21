@@ -1518,6 +1518,32 @@ class wallet_api
          );
          
       order_book get_order_book( const string& base, const string& quote, unsigned limit = 50);
+///////////////////////////////////////////////////////////////////////////////// // PeerPlays: voting balance
+      /**
+       * @brief Create voting balance or add to existing balance
+       * @param owner Owner of voting balance
+       * @param payer Payer for withdraw
+       * @param amount Amount to voting balance
+       * @param broadcast Broadcast to network
+       * @return signed_transaction
+       */
+      signed_transaction add_to_voting_balance(account_id_type owner, account_id_type payer, uint64_t amount, bool broadcast) const;
+      /**
+       * @brief Withdraw amount from voting balance
+       * @param owner Owner of voting balance
+       * @param recipient Recipient of withdraw
+       * @param amount Amount to withdraw
+       * @param broadcast Broadcast to network
+       * @return signed_transaction
+       */
+      signed_transaction withdraw_voting_balance(account_id_type owner, account_id_type recipient, uint64_t amount, bool broadcast) const;
+      /**
+       * @brief Get amount on voting balance
+       * @param owner Owner of voting balance
+       * @return voting_balance_object
+       */
+      voting_balance_object get_voting_balance(account_id_type owner) const;
+/////////////////////////////////////////////////////////////////////////////////
 
       /** Creates a new tournament
        * @param creator the accout that is paying the fee to create the tournament
@@ -1696,6 +1722,11 @@ FC_API( graphene::wallet::wallet_api,
         (get_private_key_from_password)
         (register_account)
         (upgrade_account)
+////////////////////////////////////////////// // PeerPlays: voting balance
+        (add_to_voting_balance)
+        (withdraw_voting_balance)
+        (get_voting_balance)
+////////////////////////////////////////////// 
         (create_account_with_brain_key)
         (sell_asset)
         (sell)

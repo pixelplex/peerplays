@@ -424,6 +424,11 @@ BOOST_AUTO_TEST_CASE( witness_create )
 { try {
    ACTOR(nathan);
    upgrade_to_lifetime_member(nathan_id);
+   {
+      ///////////////////// // PeerPlays: voting balance
+      // create voting balance for nathan, he will vote in the future
+      create_voting_balance( nathan_id, 5000, true, true );
+   }
    trx.clear();
    witness_id_type nathan_witness_id = create_witness(nathan_id, nathan_private_key).id;
    // Give nathan some voting stake
@@ -636,6 +641,11 @@ BOOST_AUTO_TEST_CASE( worker_pay_test )
 { try {
    INVOKE(worker_create_test);
    GET_ACTOR(nathan);
+   {
+      ///////////////////// // PeerPlays: voting balance
+      // create voting balance for nathan, he will vote in the future
+      create_voting_balance( nathan_id, 5000, true, true );
+   }
    generate_blocks(db.get_dynamic_global_properties().next_maintenance_time);
    transfer(committee_account, nathan_id, asset(100000));
 
@@ -718,6 +728,11 @@ BOOST_AUTO_TEST_CASE( refund_worker_test )
 {try{
    ACTOR(nathan);
    upgrade_to_lifetime_member(nathan_id);
+   {
+      ///////////////////// // PeerPlays: voting balance
+      // create voting balance for nathan, he will vote in the future
+      create_voting_balance( nathan_id, 5000, true, true );
+   }
    generate_block();
    generate_blocks(db.get_dynamic_global_properties().next_maintenance_time);
    set_expiration( db, trx );
@@ -791,6 +806,11 @@ BOOST_AUTO_TEST_CASE( burn_worker_test )
 {try{
    ACTOR(nathan);
    upgrade_to_lifetime_member(nathan_id);
+   {
+      ///////////////////// // PeerPlays: voting balance
+      // create voting balance for nathan, he will vote in the future
+      create_voting_balance( nathan_id, 5000, true, true );
+   }
    generate_block();
    generate_blocks(db.get_dynamic_global_properties().next_maintenance_time);
    set_expiration( db, trx );
@@ -1258,7 +1278,11 @@ BOOST_AUTO_TEST_CASE(zero_second_vbo)
    {
       ACTOR(alice);
       // don't pay witnesses so we have some worker budget to work with
-
+      {
+         ///////////////////// // PeerPlays: voting balance
+         // create voting balance for nathan, he will vote in the future
+         create_voting_balance( alice_id, 5000, true, true );
+      }
       transfer(account_id_type(), alice_id, asset(int64_t(100000) * 1100 * 1000 * 1000));
       {
          asset_reserve_operation op;

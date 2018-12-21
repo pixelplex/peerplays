@@ -32,6 +32,7 @@
 #include <graphene/chain/asset_object.hpp>
 #include <graphene/chain/committee_member_object.hpp>
 #include <graphene/chain/proposal_object.hpp>
+#include <graphene/chain/voting_balance_object.hpp> // PeerPlays: voting balance
 
 #include <graphene/db/simple_index.hpp>
 
@@ -554,6 +555,12 @@ BOOST_FIXTURE_TEST_CASE( fired_committee_members, database_fixture )
    nathan = &get_account("nathan");
    // no money yet
    BOOST_REQUIRE_EQUAL(get_balance(*nathan, asset_id_type()(db)), 5000);
+   {
+      ///////////////////// // PeerPlays: voting balance
+      // create voting balance for nathan, he will vote in the next section
+      create_voting_balance( nathan->id, 5000, true, true );
+   }
+
 
    {
       //Oh noes! Nathan votes for a whole new slate of committee_members!
@@ -1046,6 +1053,11 @@ BOOST_FIXTURE_TEST_CASE( voting_account, database_fixture )
    ACTORS((nathan)(vikram));
    upgrade_to_lifetime_member(nathan_id);
    upgrade_to_lifetime_member(vikram_id);
+   {
+      ///////////////////// // PeerPlays voting balance
+      create_voting_balance( vikram_id, 5000000, true, true );
+      create_voting_balance( nathan_id, 5000000, true, true );
+   }
    committee_member_id_type nathan_committee_member = create_committee_member(nathan_id(db)).id;
    committee_member_id_type vikram_committee_member = create_committee_member(vikram_id(db)).id;
 
