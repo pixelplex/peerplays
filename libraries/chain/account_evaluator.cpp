@@ -282,7 +282,7 @@ void_result account_update_evaluator::do_apply( const account_update_operation& 
 { try {
    database& d = db();
    bool sa_before, sa_after;
-   d.modify( *acnt, [&](account_object& a){
+   d.modify( *acnt, [&](account_object& a ){
       if( o.owner )
       {
          a.owner = *o.owner;
@@ -299,13 +299,13 @@ void_result account_update_evaluator::do_apply( const account_update_operation& 
          auto voting_obj = voting_index.find( o.account );
          std::vector<vote_id_type> diff;
 
-         std::set_symmetric_difference(o.new_options->votes.begin(), o.new_options->votes.end(),
+         std::set_symmetric_difference( o.new_options->votes.begin(), o.new_options->votes.end(),
                            a.options.votes.begin(), a.options.votes.end(),
-                           std::inserter(diff, diff.end()));
+                           std::inserter( diff, diff.end() ) );
 
          d.modify( *voting_obj, [&]( voting_balance_object& obj ){
             for( auto vote: diff ) {
-               if( obj.votes_in_period.find( vote ) != obj.votes_in_period.end() ){
+               if( obj.votes_in_period.find( vote ) == obj.votes_in_period.end() ){
                   obj.votes_in_period.insert( vote );
                } else {
                   obj.votes_in_period.erase( vote );
