@@ -11,4 +11,4 @@
 	url = git@gitlab.pixelplex.by:661-peerplays-pro/aleth.git
 [submodule "eos"]
 	path = eos
-	url = https://github.com/EOSIO/eos.git
+	url = git@gitlab.pixelplex.by:661-peerplays-pro/eos.git
