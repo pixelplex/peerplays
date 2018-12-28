@@ -186,6 +186,7 @@ void account_history_plugin::plugin_initialize(const boost::program_options::var
    database().applied_block.connect( [&]( const signed_block& b){ my->update_account_histories(b); } );
    database().add_index< primary_index< simple_index< operation_history_object > > >();
    database().add_index< primary_index< account_transaction_history_index > >();
+   database().add_index< primary_index< contract_history_index > >();
 
    LOAD_VALUE_SET(options, "tracked-accounts", my->_tracked_accounts, graphene::chain::account_id_type);
 }

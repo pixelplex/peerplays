@@ -1604,6 +1604,12 @@ class wallet_api
       fc::signal<void(bool)> lock_changed;
       std::shared_ptr<detail::wallet_api_impl> my;
       void encrypt_keys();
+
+////////////////////////////////////////////////////////////////////////////// // evm begin
+      signed_transaction create_contract(string registrar_account, string asset_type, string code, uint64_t value,
+                                         uint64_t gasPrice, uint64_t gas, bool broadcast = false,
+                                         bool save_wallet = true);
+////////////////////////////////////////////////////////////////////////////// // evm end
 };
 
 } }
@@ -1788,4 +1794,7 @@ FC_API( graphene::wallet::wallet_api,
         (get_tournaments_by_state)
         (get_tournament)
         (get_order_book)
+////////////////////////////////////////////////////////////////////////////// // evm begin
+        (create_contract)
+////////////////////////////////////////////////////////////////////////////// // evm end
       )

@@ -36,7 +36,7 @@
 namespace graphene { namespace chain {
 
 database::database() :
-   _random_number_generator(fc::ripemd160().data())
+   _executor( *this ), _random_number_generator(fc::ripemd160().data())
 {
    initialize_indexes();
    initialize_evaluators();
@@ -134,6 +134,9 @@ void database::open(
                          ("last_block->id", last_block->id())("head_block_num",head_block_num()) );
          }
       }
+
+      _executor.init( data_dir.string() );
+
    }
    FC_CAPTURE_LOG_AND_RETHROW( (data_dir) )
 }
