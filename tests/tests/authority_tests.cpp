@@ -537,6 +537,12 @@ BOOST_FIXTURE_TEST_CASE( fired_committee_members, database_fixture )
    PUSH_TX( db, trx );
    BOOST_CHECK(pid(db).is_authorized_to_execute(db));
 
+   {
+      ///////////////////// // PeerPlays: voting balance
+      // create voting balance for nathan, he will vote in the next section
+      create_voting_balance( nathan->id, 5000, true, true );
+   }
+
    ilog( "Generating blocks for 2 days" );
    generate_block();
    BOOST_REQUIRE_EQUAL(get_balance(*nathan, asset_id_type()(db)), 5000);
@@ -555,12 +561,6 @@ BOOST_FIXTURE_TEST_CASE( fired_committee_members, database_fixture )
    nathan = &get_account("nathan");
    // no money yet
    BOOST_REQUIRE_EQUAL(get_balance(*nathan, asset_id_type()(db)), 5000);
-   {
-      ///////////////////// // PeerPlays: voting balance
-      // create voting balance for nathan, he will vote in the next section
-      create_voting_balance( nathan->id, 5000, true, true );
-   }
-
 
    {
       //Oh noes! Nathan votes for a whole new slate of committee_members!
