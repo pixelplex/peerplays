@@ -475,7 +475,7 @@ void database::init_genesis(const genesis_state_type& genesis_state)
    });
    // PeerPlays: Create period_object
    create<period_object>([&](period_object& p) {
-      p.end_time = genesis_state.initial_timestamp + GRAPHENE_DEFAULT_PERIOD_INTERVAL;
+      p.end_time = genesis_state.initial_timestamp + genesis_state.initial_parameters.period_interval;
       p.current_supply = 0;
       p.whole_period_budget = 0;
       p.witness_pool = 0;

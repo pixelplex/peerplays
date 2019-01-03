@@ -29,6 +29,8 @@ namespace graphene { namespace chain {
             obj.immature_balance = op.amount;
             obj.mature_balance = 0;
             obj.voting_coefficient = GRAPHENE_100_PERCENT;
+            obj.votes_in_period.clear();
+            obj.confirmed_votes = false;
             obj.owner = op.owner;
          }).get_id();
       } else {

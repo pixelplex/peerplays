@@ -1527,7 +1527,7 @@ class wallet_api
        * @param broadcast Broadcast to network
        * @return signed_transaction
        */
-      signed_transaction add_to_voting_balance(account_id_type owner, account_id_type payer, uint64_t amount, bool broadcast) const;
+      signed_transaction add_to_voting_balance(string payer, string owner, uint64_t amount, bool broadcast) const;
       /**
        * @brief Withdraw amount from voting balance
        * @param owner Owner of voting balance
@@ -1536,13 +1536,18 @@ class wallet_api
        * @param broadcast Broadcast to network
        * @return signed_transaction
        */
-      signed_transaction withdraw_voting_balance(account_id_type owner, account_id_type recipient, uint64_t amount, bool broadcast) const;
+      signed_transaction withdraw_voting_balance(string owner, string recipient, uint64_t amount, bool broadcast) const;
       /**
        * @brief Get amount on voting balance
        * @param owner Owner of voting balance
        * @return voting_balance_object
        */
-      voting_balance_object get_voting_balance(account_id_type owner) const;
+      voting_balance_object get_voting_balance(string owner) const;
+      /**
+       * @brief Get period object
+       * @return period_object
+       */
+      period_object get_period_object() const;
 /////////////////////////////////////////////////////////////////////////////////
 
       /** Creates a new tournament
@@ -1726,6 +1731,7 @@ FC_API( graphene::wallet::wallet_api,
         (add_to_voting_balance)
         (withdraw_voting_balance)
         (get_voting_balance)
+        (get_period_object)
 ////////////////////////////////////////////// 
         (create_account_with_brain_key)
         (sell_asset)

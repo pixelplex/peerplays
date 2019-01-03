@@ -515,7 +515,8 @@ std::pair<share_type, share_type> database::reward_voting_accounts()
       modify( acc_voting_balance, [&]( voting_balance_object& obj ){
          if( acc_voting_balance.is_mature_balance_not_null() ) {
                if ( obj.is_allowed_to_award() ){
-                  fc::uint128_t acc_award = period_obj.whole_period_budget.value * obj.mature_balance.value * obj.voting_coefficient;
+                  fc::uint128_t acc_award = period_obj.whole_period_budget.value;
+                  acc_award *= obj.mature_balance.value * obj.voting_coefficient;
                   acc_award /= period_obj.current_supply.value * GRAPHENE_100_PERCENT;
                   budget_delta += share_type(acc_award.to_uint64());
                   obj.deposit_award( share_type(acc_award.to_uint64()) );
@@ -524,14 +525,14 @@ std::pair<share_type, share_type> database::reward_voting_accounts()
                else{
                   obj.decrease_coefficient( gpo.parameters.voting_coefficient_reduction );
                }
-
-               obj.votes_in_period.clear();
-               obj.confirmed_votes = false;
          }
          if( acc_voting_balance.is_immature_balance_not_null() ) {
                supply_delta += obj.immature_balance;
                obj.update_mature_balance();
          }
+
+         obj.votes_in_period.clear();
+         obj.confirmed_votes = false;
       });
    }
    return std::make_pair( supply_delta, budget_delta );

@@ -89,6 +89,7 @@ class database_api_impl : public std::enable_shared_from_this<database_api_impl>
 
 /////////////////////////////////////////////////////////////////////////////////// // voting balance
       voting_balance_object get_voting_balance( account_id_type owner ) const;
+      period_object get_period_object() const;
 ///////////////////////////////////////////////////////////////////////////////////
 
       // Balances
@@ -544,6 +545,16 @@ voting_balance_object database_api::get_voting_balance( account_id_type owner ) 
 {
    return my->get_voting_balance( owner );
 }
+
+period_object database_api_impl::get_period_object() const{
+   return _db.get_period_object();
+}
+
+period_object database_api::get_period_object() const
+{
+   return my->get_period_object();
+}
+
 
 ////////////////////////////////////////////////////////////////////////////////
 

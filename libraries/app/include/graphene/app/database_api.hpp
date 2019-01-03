@@ -245,6 +245,7 @@ class database_api
 
 ///////////////////////////////////////////////////////////////////////////////// // voting balance
       voting_balance_object get_voting_balance( account_id_type owner ) const;
+      period_object get_period_object() const;
 /////////////////////////////////////////////////////////////////////////////////
 
       /**
@@ -632,6 +633,7 @@ FC_API(graphene::app::database_api,
    (get_account_count)
 ///////////////////////////////////// // voting balance
    (get_voting_balance)
+   (get_period_object)
 /////////////////////////////////////
 
    // Balances

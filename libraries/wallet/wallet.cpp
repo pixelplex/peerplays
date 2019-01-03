@@ -5047,12 +5047,12 @@ order_book wallet_api::get_order_book( const string& base, const string& quote, 
 }
 
 ///////////////////////////////////////////////////////////////////////////////// // PeerPlays: voting balance
-signed_transaction wallet_api::add_to_voting_balance(account_id_type owner, account_id_type payer, uint64_t amount, bool broadcast) const
+signed_transaction wallet_api::add_to_voting_balance(string payer, string owner, uint64_t amount, bool broadcast) const
 {
    FC_ASSERT( !is_locked() );
    voting_balance_input_operation voting_input;
-   voting_input.payer = payer;
-   voting_input.owner = owner;
+   voting_input.payer = get_account_id(payer);
+   voting_input.owner = get_account_id(owner);
    voting_input.amount = share_type(amount);
 
    signed_transaction tx;
@@ -5063,12 +5063,12 @@ signed_transaction wallet_api::add_to_voting_balance(account_id_type owner, acco
    return my->sign_transaction( tx, broadcast );
 }
 
-signed_transaction wallet_api::withdraw_voting_balance(account_id_type owner, account_id_type recipient, uint64_t amount, bool broadcast) const
+signed_transaction wallet_api::withdraw_voting_balance(string owner, string recipient, uint64_t amount, bool broadcast) const
 {
    FC_ASSERT( !is_locked() );
    voting_balance_output_operation voting_output;
-   voting_output.owner = owner;
-   voting_output.recipient = recipient;
+   voting_output.owner = get_account_id(owner);
+   voting_output.recipient = get_account_id(recipient);
    voting_output.amount = share_type(amount);
 
    signed_transaction tx;
@@ -5079,9 +5079,14 @@ signed_transaction wallet_api::withdraw_voting_balance(account_id_type owner, ac
    return my->sign_transaction( tx, broadcast );
 }
 
-voting_balance_object wallet_api::get_voting_balance(account_id_type owner) const
+voting_balance_object wallet_api::get_voting_balance(string owner) const
 {
-   return my->_remote_db->get_voting_balance( owner );
+   return my->_remote_db->get_voting_balance( get_account_id(owner) );
+}
+
+period_object wallet_api::get_period_object() const
+{
+   return my->_remote_db->get_period_object();
 }
 /////////////////////////////////////////////////////////////////////////////////
 

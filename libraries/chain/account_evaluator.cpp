@@ -271,7 +271,9 @@ void_result account_update_evaluator::do_evaluate( const account_update_operatio
 //////////////////////////////////////////////////////////// voting balance
    if( o.new_options.valid() ) {
       const auto& voting_index = d.get_index_type< voting_balance_index >().indices().get< graphene::chain::by_owner >();
-      FC_ASSERT( voting_index.find( o.account ) != voting_index.end() );
+      auto itr = voting_index.find( o.account );
+      FC_ASSERT( itr != voting_index.end() );
+      FC_ASSERT( itr->mature_balance > 0 );
       verify_account_votes( d, *o.new_options );
    }
 ////////////////////////////////////////////////////////////
@@ -306,9 +308,9 @@ void_result account_update_evaluator::do_apply( const account_update_operation& 
          d.modify( *voting_obj, [&]( voting_balance_object& obj ){
             for( auto vote: diff ) {
                if( obj.votes_in_period.find( vote ) != obj.votes_in_period.end() ){
-                  obj.votes_in_period.insert( vote );
-               } else {
                   obj.votes_in_period.erase( vote );
+               } else {
+                  obj.votes_in_period.insert( vote );
                }
             }
          });
