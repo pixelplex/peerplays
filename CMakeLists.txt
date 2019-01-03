@@ -34,6 +34,8 @@ HunterGate(
 project( BitShares )
 #cmake_minimum_required( VERSION 2.8.12 )
 cmake_minimum_required( VERSION 3.5.2 )
+set( CMAKE_CXX_STANDARD 14 ) # eos::wavm requiers C++14
+set(CMAKE_CXX_EXTENSIONS On) # eos::wavm requiers extensions, like gnu++14
 
 set( BLOCKCHAIN_NAME "BitShares" )
 
@@ -158,7 +160,7 @@ else( WIN32 ) # Apple AND Linux
     else( APPLE )
         # Linux Specific Options Here
         message( STATUS "Configuring BitShares on Linux" )
-        set( CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} -std=c++11 -Wall -DETH_FATDB" )
+        set( CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} -Wall -DETH_FATDB" ) # TODO: rm `-std=c++14`
         set( rt_library rt )
         set( pthread_library pthread)
         if ( NOT DEFINED crypto_library )
@@ -216,6 +218,24 @@ add_subdirectory( aleth/libethashseal )
 add_subdirectory( aleth/libevm )
 add_subdirectory( aleth/libp2p )
 add_subdirectory( aleth/libdevcrypto )
+
+
+include_directories( eos/libraries/chain )
+include_directories( eos/libraries/chain/include )
+include_directories( eos/libraries/chainbase/include )
+include_directories( eos/libraries/wasm-jit/Include )
+include_directories( eos/libraries/types/include )
+include_directories( eos/libraries/fc/include )
+include_directories( eos/libraries/fc )
+include_directories( eos/libraries/softfloat/source/include )
+
+add_subdirectory( eos/libraries/chain )
+add_subdirectory( eos/libraries/chainbase )
+add_subdirectory( eos/libraries/wasm-jit )
+add_subdirectory( eos/libraries/softfloat )
+add_subdirectory( eos/libraries/fc )
+add_subdirectory( eos/libraries/wabt )
+add_subdirectory( eos/libraries/builtins )
 ########################################################## PP end
 
 set(BUILD_BITSHARES_PROGRAMS TRUE CACHE BOOL "Build bitshares executables (witness node, cli wallet, etc)")
