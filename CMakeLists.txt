@@ -160,7 +160,11 @@ else( WIN32 ) # Apple AND Linux
     else( APPLE )
         # Linux Specific Options Here
         message( STATUS "Configuring BitShares on Linux" )
-        set( CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} -Wall -DETH_FATDB" ) # TODO: rm `-std=c++14`
+        set( CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} -Wall -DETH_FATDB" )
+        if( "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" )
+            set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-invalid-partial-specialization" )
+            message( STATUS "Using Clang on Linux, set -Wno-invalid-partial-specialization compiler option" )
+        endif()
         set( rt_library rt )
         set( pthread_library pthread)
         if ( NOT DEFINED crypto_library )
@@ -225,8 +229,8 @@ include_directories( eos/libraries/chain/include )
 include_directories( eos/libraries/chainbase/include )
 include_directories( eos/libraries/wasm-jit/Include )
 include_directories( eos/libraries/types/include )
-include_directories( eos/libraries/fc/include )
-include_directories( eos/libraries/fc )
+# include_directories( eos/libraries/fc/include )
+# include_directories( eos/libraries/fc )
 include_directories( eos/libraries/softfloat/source/include )
 
 add_subdirectory( eos/libraries/chain )
