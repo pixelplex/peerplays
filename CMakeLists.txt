@@ -35,7 +35,7 @@ project( BitShares )
 #cmake_minimum_required( VERSION 2.8.12 )
 cmake_minimum_required( VERSION 3.5.2 )
 set( CMAKE_CXX_STANDARD 14 ) # eos::wavm requiers C++14
-set(CMAKE_CXX_EXTENSIONS On) # eos::wavm requiers extensions, like gnu++14
+set( CMAKE_CXX_EXTENSIONS On ) # eos::wavm requiers extensions, like gnu++14
 
 set( BLOCKCHAIN_NAME "BitShares" )
 
@@ -205,11 +205,6 @@ add_subdirectory( libraries )
 
 ########################################################## PP begin
 include_directories( aleth )
-include_directories( aleth/libethereum )
-include_directories( aleth/libdevcore )
-include_directories( aleth/libethcore )
-include_directories( aleth/libethashseal )
-include_directories( aleth/libevm )
 include_directories( aleth/utils )
 include_directories( aleth/deps/include )
 
@@ -222,16 +217,6 @@ add_subdirectory( aleth/libethashseal )
 add_subdirectory( aleth/libevm )
 add_subdirectory( aleth/libp2p )
 add_subdirectory( aleth/libdevcrypto )
-
-
-include_directories( eos/libraries/chain )
-include_directories( eos/libraries/chain/include )
-include_directories( eos/libraries/chainbase/include )
-include_directories( eos/libraries/wasm-jit/Include )
-include_directories( eos/libraries/types/include )
-# include_directories( eos/libraries/fc/include )
-# include_directories( eos/libraries/fc )
-include_directories( eos/libraries/softfloat/source/include )
 
 add_subdirectory( eos/libraries/chain )
 add_subdirectory( eos/libraries/chainbase )

@@ -8,7 +8,7 @@ set(SOURCES node.cpp
 add_library( graphene_p2p  ${SOURCES} ${HEADERS} )
 
 target_link_libraries( graphene_p2p  
-  PUBLIC fc graphene_db )
+  PUBLIC fc_pp graphene_db )
 target_include_directories( graphene_p2p  
   PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include"
   PRIVATE "${CMAKE_SOURCE_DIR}/libraries/chain/include"
