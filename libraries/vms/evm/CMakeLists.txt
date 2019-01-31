@@ -3,10 +3,6 @@ file( GLOB HEADERS "*.hpp" )
 
 add_library( pp_evm STATIC ${SOURCES} ${HEADERS} )
 
-# set_target_properties( pp_evm PROPERTIES LINK_LIBRARIES "$<TARGET_FILE:devcore>;$<TARGET_FILE:ethereum>;$<TARGET_FILE:ethashseal>"
-#                        LINKER_LANGUAGE CXX )
-# add_dependencies( pp_evm evmc devcore ethereum ethashseal )
-
 target_link_libraries( pp_evm vms_base evmc devcore ethereum ethashseal )
 target_include_directories( pp_evm PUBLIC
                             "${CMAKE_CURRENT_SOURCE_DIR}"

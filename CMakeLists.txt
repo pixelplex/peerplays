@@ -225,6 +225,11 @@ add_subdirectory( eos/libraries/softfloat )
 add_subdirectory( eos/libraries/fc )
 add_subdirectory( eos/libraries/wabt )
 add_subdirectory( eos/libraries/builtins )
+
+if(NOT APPLE)
+  # test_cypher_suites need pthread_library, but it not links in eos::fc
+  set_property( TARGET fc APPEND PROPERTY INTERFACE_LINK_LIBRARIES ${pthread_library} )
+endif()
 ########################################################## PP end
 
 set(BUILD_BITSHARES_PROGRAMS TRUE CACHE BOOL "Build bitshares executables (witness node, cli wallet, etc)")
