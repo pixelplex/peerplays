@@ -1,6 +1,26 @@
 # Defines BitShares library target.
 
 ########################################################## PP begin
+
+# eos requiers this versions!
+# http://stackoverflow.com/a/18369825
+if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+    if (CMAKE_CXX_COMPILER_VERSION VERSION_LESS 6.0)
+        message(FATAL_ERROR "GCC version must be at least 6.0!")
+    endif()
+    if ("${CMAKE_GENERATOR}" STREQUAL "Ninja")
+       add_compile_options(-fdiagnostics-color=always)
+    endif()
+elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "AppleClang")
+    if (CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.0)
+        message(FATAL_ERROR "Clang version must be at least 4.0!")
+    endif()
+    if ("${CMAKE_GENERATOR}" STREQUAL "Ninja")
+       add_compile_options(-fcolor-diagnostics)
+    endif()
+endif()
+
+
 include(aleth/evmc/cmake/cable/bootstrap.cmake)
 include(CableBuildInfo)
 include(CableBuildType)
