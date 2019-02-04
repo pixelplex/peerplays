@@ -32,10 +32,14 @@ HunterGate(
 ########################################################## PP end
 
 project( BitShares )
-#cmake_minimum_required( VERSION 2.8.12 )
 cmake_minimum_required( VERSION 3.5.2 )
-set( CMAKE_CXX_STANDARD 14 ) # eos::wavm requiers C++14
-set( CMAKE_CXX_EXTENSIONS OFF ) # eos::wavm requiers extensions, like gnu++14
+
+########################################################## PP begin
+set( CMAKE_CXX_STANDARD 14 )      # eos::wavm requiers C++14
+if( NOT APPLE )
+  set( CMAKE_CXX_EXTENSIONS ON ) # eos::wavm requiers extensions, like gnu++14
+endif()
+########################################################## PP end
 
 set( OPENSSL_USE_STATIC_LIBS TRUE )
 set( BLOCKCHAIN_NAME "BitShares" )
@@ -62,11 +66,8 @@ find_package(libscrypt CONFIG REQUIRED)
 hunter_add_package(ethash)
 find_package(ethash CONFIG REQUIRED)
 
-#include( "${ETH_CMAKE_DIR}/EthUtils.cmake" )
-#include( "${ETH_CMAKE_DIR}/EthExecutableHelper.cmake" )
 include( "${ETH_CMAKE_DIR}/ProjectLibFF.cmake" )
 include( "${ETH_CMAKE_DIR}/ProjectSecp256k1.cmake" )
-#include( "${ETH_CMAKE_DIR}/EthDependencies.cmake" )
 ########################################################## PP end
 
 set( CLI_CLIENT_EXECUTABLE_NAME graphene_client )
@@ -102,6 +103,7 @@ list( APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/libraries/fc/GitVers
 include( GetGitRevisionDescription )
 get_git_head_revision( GIT_REFSPEC GIT_SHA2 )
 
+########################################################## PP begin
 if( APPLE )
   include( "cmake/ProjectBoost.cmake" )
 endif()
@@ -132,6 +134,7 @@ set(Boost_USE_STATIC_LIBS ON)
 set(Boost_USE_MULTITHREADED ON)
 hunter_add_package( Boost COMPONENTS ${BOOST_COMPONENTS} )
 find_package( Boost CONFIG REQUIRED ${FIND_BOOST_COMPONENTS} )
+########################################################## PP end
 
 IF( WIN32 )
   SET(BOOST_ROOT $ENV{BOOST_ROOT})
@@ -228,16 +231,16 @@ if(ENABLE_COVERAGE_TESTING)
     SET(CMAKE_CXX_FLAGS "--coverage ${CMAKE_CXX_FLAGS}")
 endif()
 
-if(APPLE)
+########################################################## PP begin
+if( APPLE )
   # to find OpenSSL we need this var
   set( OPENSSL_ROOT ${OPENSSL_ROOT_DIR} )
 endif()
 
 add_subdirectory( libraries )
 
-########################################################## PP begin
 if( APPLE )
-  set( CMAKE_CXX_STANDARD 11 ) # eos::wavm requiers C++14
+  set( CMAKE_CXX_STANDARD 11 )
 endif()
 
 include_directories( aleth )
@@ -255,7 +258,7 @@ add_subdirectory( aleth/libp2p )
 add_subdirectory( aleth/libdevcrypto )
 
 if( APPLE )
-  set( CMAKE_CXX_STANDARD 14 ) # eos::wavm requiers C++14
+  set( CMAKE_CXX_STANDARD 14 )
 endif()
 
 add_subdirectory( eos/libraries/chain )

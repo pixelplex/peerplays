@@ -122,7 +122,7 @@ namespace
 
     bool is_special_account(const graphene::chain::account_id_type& account_id)
     {
-    // use of overloaded operator '<' is ambiguous
+    // compilation error: use of overloaded operator '<' is ambiguous
     #ifndef __clang__
         return account_id.instance < 100;
     #else
