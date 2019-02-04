@@ -35,8 +35,9 @@ project( BitShares )
 #cmake_minimum_required( VERSION 2.8.12 )
 cmake_minimum_required( VERSION 3.5.2 )
 set( CMAKE_CXX_STANDARD 14 ) # eos::wavm requiers C++14
-set( CMAKE_CXX_EXTENSIONS On ) # eos::wavm requiers extensions, like gnu++14
+set( CMAKE_CXX_EXTENSIONS OFF ) # eos::wavm requiers extensions, like gnu++14
 
+set( OPENSSL_USE_STATIC_LIBS TRUE )
 set( BLOCKCHAIN_NAME "BitShares" )
 
 ########################################################## PP begin
@@ -101,10 +102,36 @@ list( APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/libraries/fc/GitVers
 include( GetGitRevisionDescription )
 get_git_head_revision( GIT_REFSPEC GIT_SHA2 )
 
+if( APPLE )
+  include( "cmake/ProjectBoost.cmake" )
+endif()
+
+set( BOOST_COMPONENTS )
+list( APPEND BOOST_COMPONENTS  program_options 
+                               filesystem system 
+                               thread 
+                               context 
+                               iostreams 
+                               date_time
+                               signals
+                               serialization
+                               chrono 
+                               locale
+                               fiber
+                               coroutine )
+
+if( NOT APPLE )
+  list( APPEND BOOST_COMPONENTS log )
+endif()
+
+set( FIND_BOOST_COMPONENTS ${BOOST_COMPONENTS} )
+list( APPEND BOOST_COMPONENTS test )
+list( APPEND FIND_BOOST_COMPONENTS unit_test_framework )
+
 set(Boost_USE_STATIC_LIBS ON)
 set(Boost_USE_MULTITHREADED ON)
-hunter_add_package( Boost COMPONENTS program_options filesystem system thread context iostreams date_time signals serialization chrono locale fiber coroutine test log )
-find_package( Boost CONFIG REQUIRED program_options filesystem system thread context iostreams date_time signals serialization chrono locale fiber coroutine unit_test_framework log )
+hunter_add_package( Boost COMPONENTS ${BOOST_COMPONENTS} )
+find_package( Boost CONFIG REQUIRED ${FIND_BOOST_COMPONENTS} )
 
 IF( WIN32 )
   SET(BOOST_ROOT $ENV{BOOST_ROOT})
@@ -156,7 +183,7 @@ else( WIN32 ) # Apple AND Linux
     if( APPLE )
         # Apple Specific Options Here
         message( STATUS "Configuring BitShares on OS X" )
-        set( CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} -std=c++11 -stdlib=libc++ -Wall -DETH_FATDB" )
+        set( CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} -stdlib=libc++ -Wall -DETH_FATDB -Wno-invalid-partial-specialization" )
     else( APPLE )
         # Linux Specific Options Here
         message( STATUS "Configuring BitShares on Linux" )
@@ -201,9 +228,18 @@ if(ENABLE_COVERAGE_TESTING)
     SET(CMAKE_CXX_FLAGS "--coverage ${CMAKE_CXX_FLAGS}")
 endif()
 
+if(APPLE)
+  # to find OpenSSL we need this var
+  set( OPENSSL_ROOT ${OPENSSL_ROOT_DIR} )
+endif()
+
 add_subdirectory( libraries )
 
 ########################################################## PP begin
+if( APPLE )
+  set( CMAKE_CXX_STANDARD 11 ) # eos::wavm requiers C++14
+endif()
+
 include_directories( aleth )
 include_directories( aleth/utils )
 include_directories( aleth/deps/include )
@@ -217,6 +253,10 @@ add_subdirectory( aleth/libethashseal )
 add_subdirectory( aleth/libevm )
 add_subdirectory( aleth/libp2p )
 add_subdirectory( aleth/libdevcrypto )
+
+if( APPLE )
+  set( CMAKE_CXX_STANDARD 14 ) # eos::wavm requiers C++14
+endif()
 
 add_subdirectory( eos/libraries/chain )
 add_subdirectory( eos/libraries/chainbase )

@@ -145,6 +145,10 @@ namespace graphene { namespace chain {
 
          vesting_balance_object() {}
 
+         asset_id_type get_asset_id() const { return balance.asset_id; }
+
+         share_type get_asset_amount() const { return balance.amount; }
+
          ///@brief Deposit amount into vesting balance, requiring it to vest before withdrawal
          void deposit(const fc::time_point_sec& now, const asset& amount);
          bool is_deposit_allowed(const fc::time_point_sec& now, const asset& amount)const;
@@ -169,6 +173,7 @@ namespace graphene { namespace chain {
           */
          asset get_allowed_withdraw(const time_point_sec& now)const;
    };
+ 
    /**
     * @ingroup object_index
     */
@@ -184,8 +189,8 @@ namespace graphene { namespace chain {
         ordered_non_unique< tag<by_asset_balance>,
            composite_key<
               vesting_balance_object,
-              member_offset<vesting_balance_object, asset_id_type, (size_t) (offset_s(vesting_balance_object,balance) + offset_s(asset,asset_id))>,
-              member_offset<vesting_balance_object, share_type, (size_t) (offset_s(vesting_balance_object,balance) + offset_s(asset,amount))>
+              const_mem_fun<vesting_balance_object, asset_id_type, &vesting_balance_object::get_asset_id>,
+              const_mem_fun<vesting_balance_object, share_type, &vesting_balance_object::get_asset_amount>
               //member<vesting_balance_object, account_id_type, &vesting_balance_object::owner>
               //member_offset<vesting_balance_object, account_id_type, (size_t) (offset_s(vesting_balance_object,owner))>
            >,

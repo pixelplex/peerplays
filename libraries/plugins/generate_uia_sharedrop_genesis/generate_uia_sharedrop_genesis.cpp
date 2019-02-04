@@ -122,7 +122,12 @@ namespace
 
     bool is_special_account(const graphene::chain::account_id_type& account_id)
     {
+    // use of overloaded operator '<' is ambiguous
+    #ifndef __clang__
         return account_id.instance < 100;
+    #else
+        return account_id.instance < (uint32_t)100;
+    #endif // __clang__
     }
 
     bool is_scam(const std::string& account_name)
