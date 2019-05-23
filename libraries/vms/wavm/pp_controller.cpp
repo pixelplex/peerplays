@@ -35,6 +35,51 @@ using contract_database_index_set = eosio::chain::index_set<
    eosio::chain::index_long_double_index
 >;
 
+eosio::chain::account_name id_to_wavm_name( const uint32_t& id, const uint32_t& type )
+{
+   const std::string charmap = "12345abcdefghijklmnopqrstuvwxyz";
+   assert( type == 0 || type == 1 );
+   std::string prefix = (type == 0 ? "a." : "c.");
+   std::string str;
+
+   uint32_t tmp = id;
+   do
+   {
+      uint32_t val = tmp%31;
+      char c = charmap[ val ];
+      str.push_back(c);
+      tmp = tmp/31;
+   } while(tmp);
+
+   std::reverse(str.begin(), str.end());
+
+   return eosio::chain::name(prefix + str);
+}
+
+std::pair<uint64_t, uint64_t> wavm_name_to_id( const eosio::chain::account_name acc_name )
+{
+   const std::string charmap = "12345abcdefghijklmnopqrstuvwxyz";
+   uint32_t type, id = 0;
+   std::string str_name = acc_name.to_string();
+
+   if( str_name[0] == 'c' )
+      type = 1;
+   else if( str_name[0] == 'a' )
+      type = 0;
+   else
+      assert( false );
+
+   str_name.erase(0,2);
+   std::reverse( str_name.begin(), str_name.end() );
+
+   for( size_t i = 0; i < str_name.size(); i++ )
+   {
+      auto n = charmap.find( str_name[i] );
+      id += n*pow(31, i);
+   }
+
+   return std::make_pair( type, id );
+}
 
 struct pp_controller_impl {
    pp_controller&                               self;

@@ -7,6 +7,10 @@ namespace vms { namespace wavm {
 
 struct pp_controller_impl;
 
+eosio::chain::account_name id_to_wavm_name( const uint32_t& id, const uint32_t& type );
+
+std::pair<uint64_t, uint64_t> wavm_name_to_id( const eosio::chain::account_name acc_name );
+
 class pp_controller : public eosio::chain::abstract_controller 
 {
 

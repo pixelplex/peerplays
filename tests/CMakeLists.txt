@@ -41,4 +41,9 @@ file(GLOB RANDOM_SOURCES "random/*.cpp")
 add_executable( random_test ${RANDOM_SOURCES} ${COMMON_SOURCES} )
 target_link_libraries( random_test graphene_chain graphene_app graphene_egenesis_none fc_pp ${PLATFORM_SPECIFIC_LIBS} )
 
+file(GLOB WAVM_SOURCES "wavm/*.cpp")
+add_executable( wavm_test ${WAVM_SOURCES} ${COMMON_SOURCES} )
+target_link_libraries( wavm_test graphene_chain graphene_app graphene_egenesis_none fc_pp ${PLATFORM_SPECIFIC_LIBS} )
+
+
 add_subdirectory( generate_empty_blocks )

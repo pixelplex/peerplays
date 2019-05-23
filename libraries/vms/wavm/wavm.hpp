@@ -27,15 +27,9 @@ private:
 
    wavm_adapter& get_adapter() { return adapter; }
 
-   eosio::chain::account_name id_to_wavm_name( const uint64_t& id, const uint64_t& type );
-
-   std::pair<uint64_t, uint64_t> wavm_name_to_id( const eosio::chain::account_name acc_name );
-
    pp_controller contr;
 
    vms::wavm::wavm_adapter adapter;
-
-   const std::string charmap = "12345abcdefghijklmnopqrstuvwxyz";
 
 };
 
