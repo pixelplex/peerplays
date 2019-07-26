@@ -97,5 +97,9 @@ uint32_t database::last_non_undoable_block_num() const
    return head_block_num() - _undo_db.size();
 }
 
+const btc_sidechain::btc_sidechain_parameters_extension& database::get_sidechain_params() const
+{
+   return get_global_properties().parameters.btc_sidechain_params;
+}
 
 } }

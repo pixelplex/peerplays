@@ -233,3 +233,28 @@
 #define PEERPLAYS_DEFAULT_MIN_SON_MEMBER_COUNT              (11)        // should be odd
 #define PEERPLAYS_DEFAULT_SON_DEPOSIT_AMOUNT                1000        // default deposit amount to create SON member
 #define PEERPLAYS_DEFAULT_SON_DELETING_TIME                 fc::days(2) // default time to delete SON member
+
+/// BTC sidecahin params
+
+/// Asset symbol of btc sidechaincoin
+#define BTC_SIDECHAIN_SYMBOL                                 "pBTC"
+/// TODO: comments
+#define BTC_SIDECHAIN_PRECISION_DIGITS                       8
+/// TODO: comments
+#define BTC_SIDECHAIN_MAX_SHARE_SUPPLY                       int64_t(21000000ll * 100000000ll)
+/// Number of invalid keys for which deposit address is valid
+#define BTC_SIDECHAIN_NUMBER_INVALID_KEYS                    5
+/// Number of keys in multisig
+#define BTC_SIDECHAIN_DEFAULT_NUMBER_SIG_MULTISIG            5
+/// TODO: comments
+#define BTC_SIDECHAIN_DEFAULT_NUMBER_OF_CONFIRMATIONS        6
+/// TODO: comments
+#define BTC_SIDECHAIN_DEFAULT_MAX_UNCONFIRMED_VOUTS          25
+/// TODO: comments
+#define BTC_SIDECHAIN_DEFAULT_MAX_CONDENSING_TX_VINS         5
+/// TODO: comments
+#define BTC_SIDECHAIN_DEFAULT_MAX_CONDENSING_TX_VOUTS        5
+/// TODO: comments
+#define BTC_SIDECHAIN_DEFAULT_PERCENT_PAYMENT_TO_WITNESSES   (GRAPHENE_1_PERCENT/10)
+/// TODO: comments
+#define BTC_SIDECHAIN_NULL_VIN_IDENTIFIER                    "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b4" // fc::sha256::hash( "" + std::to_string( 0 ) ) - ( 8 bytes )

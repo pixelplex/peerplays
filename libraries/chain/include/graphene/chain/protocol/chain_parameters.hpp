@@ -29,6 +29,8 @@
 
 #include <graphene/chain/hardfork.hpp>
 
+#include <graphene/chain/btc-sidechain/btc_sidechain_parameters.hpp>
+
 namespace graphene { namespace chain { struct fee_schedule; } }
 
 namespace graphene { namespace chain {
@@ -98,6 +100,8 @@ namespace graphene { namespace chain {
       fc::microseconds        son_deleting_time                   = PEERPLAYS_DEFAULT_SON_DELETING_TIME;
 
       extension<parameter_extension> extensions;
+
+      btc_sidechain::btc_sidechain_parameters_extension btc_sidechain_params;
 
       /** defined in fee_schedule.cpp */
       void validate()const;

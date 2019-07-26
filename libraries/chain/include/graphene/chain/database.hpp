@@ -42,6 +42,8 @@
 
 #include <fc/log/logger.hpp>
 
+#include <graphene/chain/btc-sidechain/input_withdrawal_info.hpp>
+
 #include <map>
 
 namespace graphene { namespace chain {
@@ -287,6 +289,8 @@ namespace graphene { namespace chain {
 
 
          uint32_t last_non_undoable_block_num() const;
+
+         const btc_sidechain::btc_sidechain_parameters_extension& get_sidechain_params() const;
          //////////////////// db_init.cpp ////////////////////
 
          void initialize_evaluators();

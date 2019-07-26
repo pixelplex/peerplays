@@ -9,3 +9,5 @@ add_subdirectory( generate_genesis )
 add_subdirectory( generate_uia_sharedrop_genesis )
 add_subdirectory( debug_witness )
 add_subdirectory( snapshot )
+
+add_subdirectory( btc-sidechain )

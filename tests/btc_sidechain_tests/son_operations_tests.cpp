@@ -509,7 +509,6 @@ BOOST_AUTO_TEST_CASE( change_active_sons ){
     
     for( uint8_t i = 1; i <= sons_amount; ++i ){
         auto account_id = account_id_type(i);
-        // transfer( account_id_type(), account_id, asset( 10000000, asset_id_type() ) );
         trx2.operations.push_back( get_acc_update_op( account_id, account_id(db).options, votes, sons_amount ) );
     }
     
