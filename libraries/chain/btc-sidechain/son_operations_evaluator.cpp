@@ -7,6 +7,8 @@ namespace graphene { namespace chain {
 
 void_result create_son_member_evaluator::do_evaluate(const son_member_create_operation& op)
 { try{
+    const auto& idx = db().get_index_type<son_member_index>().indices().get<by_account>();
+    FC_ASSERT( idx.find(op.owner_account) == idx.end(), "SON already registed for this account." );
     FC_ASSERT(db().get_balance(op.owner_account, asset_id_type()).amount >= db().get_global_properties().parameters.son_deposit_amount,
               "Not enought core asset to create SON." );
     return void_result();
