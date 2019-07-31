@@ -29,6 +29,7 @@
 #include <graphene/chain/protocol/fee_schedule.hpp>
 #include <graphene/chain/protocol/vote.hpp>
 #include <graphene/chain/transaction_evaluation_state.hpp>
+#include <graphene/chain/chain_property_object.hpp>
 
 #include <fc/smart_ref_impl.hpp>
 
@@ -93,6 +94,8 @@ void_result committee_member_update_global_parameters_evaluator::do_evaluate(con
    if( !o.new_parameters.extensions.value.min_bet_multiplier.valid()
         && o.new_parameters.extensions.value.max_bet_multiplier.valid() )
        FC_ASSERT( dgpo->parameters.min_bet_multiplier() < *o.new_parameters.extensions.value.max_bet_multiplier );
+
+   FC_ASSERT( db().get_chain_properties().immutable_parameters.min_son_member_count > o.new_parameters.son_count, "New SON count lower than minimum allowed." );
 
    return void_result();
 } FC_CAPTURE_AND_RETHROW( (o) ) }

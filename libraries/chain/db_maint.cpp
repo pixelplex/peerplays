@@ -328,20 +328,7 @@ void database::update_active_committee_members()
 
 void database::update_active_son_members()
 { try {
-   share_type stake_target = (_total_voting_stake-_son_count_histogram_buffer[0]) / 2;
-
-   /// accounts that vote for 0 or 1 sons do not get to express an opinion on
-   /// the number of sons to have (they abstain and are non-voting accounts)
-   uint64_t stake_tally = 0; // _son_count_histogram_buffer[0];
-   size_t son_member_count = 0;
-   
-   if( stake_target > 0 )
-      while( (son_member_count < _son_count_histogram_buffer.size() - 1)
-             && (stake_tally <= stake_target) )
-         stake_tally += _son_count_histogram_buffer[++son_member_count];
-
-   const chain_property_object& cpo = get_chain_properties();
-   auto son_members = sort_votable_objects<son_member_index>(std::max(son_member_count*2+1, (size_t)cpo.immutable_parameters.min_son_member_count));
+   auto son_members = sort_votable_objects<son_member_index>( get_global_properties().parameters.son_count ) ;
 
    for( const son_member_object& son : son_members )
    {
@@ -1432,7 +1419,6 @@ void database::perform_chain_maintenance(const signed_block& next_block, const g
          d._vote_tally_buffer.resize(props.next_available_vote_id);
          d._witness_count_histogram_buffer.resize(props.parameters.maximum_witness_count / 2 + 1);
          d._committee_count_histogram_buffer.resize(props.parameters.maximum_committee_count / 2 + 1);
-         d._son_count_histogram_buffer.resize(props.parameters.maximum_son_count / 2 + 1);
          d._total_voting_stake = 0;
 
          auto balance_type = vesting_balance_type::unspecified;
@@ -1535,16 +1521,6 @@ void database::perform_chain_maintenance(const signed_block& next_block, const g
                // same rationale as for witnesses
                d._committee_count_histogram_buffer[offset] += voting_stake;
             }
-            if( opinion_account.options.num_son <= props.parameters.maximum_son_count )
-            {
-               uint16_t offset = std::min(size_t(opinion_account.options.num_son/2),
-                                          d._son_count_histogram_buffer.size() - 1);
-               // votes for a number greater than maximum_son_count
-               // are turned into votes for maximum_son_count.
-               //
-               // same rationale as for witnesses
-               d._son_count_histogram_buffer[offset] += voting_stake;
-            }
 
             d._total_voting_stake += voting_stake;
          }
@@ -1575,7 +1551,6 @@ void database::perform_chain_maintenance(const signed_block& next_block, const g
    };
    clear_canary a(_witness_count_histogram_buffer),
                 b(_committee_count_histogram_buffer),
-                d(_son_count_histogram_buffer),
                 c(_vote_tally_buffer);
 
    update_top_n_authorities(*this);

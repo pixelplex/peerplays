@@ -37,12 +37,18 @@ const auto skip_flags = database::skip_authority_check | database::skip_fork_db;
 const uint64_t max_asset = 1000000000000000;
 const uint64_t asset_amount = 30000000;
 
-inline account_update_operation get_acc_update_op( account_id_type acc, account_options acc_opt, flat_set<vote_id_type> votes, uint16_t sons_amount ){
+inline void set_son_count( database& db, uint16_t count ){
+    db.modify( db.get_global_properties(), [&]( global_property_object& _gpo )
+    {
+       _gpo.parameters.son_count = count;
+    } );
+}
+
+inline account_update_operation get_acc_update_op( account_id_type acc, account_options acc_opt, flat_set<vote_id_type> votes ){
     account_update_operation op;
     op.account = acc;
     op.new_options = acc_opt;
     op.new_options->votes = votes;
-    op.new_options->num_son = sons_amount;
     return op;
 }
 
@@ -71,10 +77,11 @@ inline void create_active_sons( database_fixture& df, uint8_t sons_amount = 3 ) 
         votes.insert( iter.vote_id );
     }
     signed_transaction trx2;
+    set_son_count( df.db, sons_amount );
     for( uint8_t i = 1; i <= sons_amount; ++i ){
         auto account_id = account_id_type(i);
         df.transfer( account_id_type(), account_id, asset( 10000000, asset_id_type() ) );
-        trx2.operations.push_back( get_acc_update_op( account_id, account_id(df.db).options, votes, sons_amount ) );
+        trx2.operations.push_back( get_acc_update_op( account_id, account_id(df.db).options, votes ) );
     }
 
     trx2.validate();
@@ -124,10 +131,7 @@ inline std::map<vote_id_type, son_member_id_type> create_son_members( database& 
 }
 
 inline void set_maintenance_params( database& db, uint64_t acc_amount, uint64_t asset_amount, uint64_t new_active_sons_count, std::map<vote_id_type, son_member_id_type> sons ){
-    db._son_count_histogram_buffer.resize( 501 );
-    db._son_count_histogram_buffer[0] = max_asset - acc_amount * asset_amount;
-    db._son_count_histogram_buffer[new_active_sons_count >> 1] = acc_amount * asset_amount;
-    db._total_voting_stake = max_asset;
+    set_son_count( db, new_active_sons_count );
     db._vote_tally_buffer.resize( 20 + acc_amount );
     for( auto iter: sons ) {
         db._vote_tally_buffer[iter.first] = acc_amount * asset_amount;
@@ -370,9 +374,8 @@ BOOST_AUTO_TEST_CASE( update_active_sons_with_new_account_test ) {
 
     const auto& idx = db.get_index_type<son_member_index>().indices().get<by_account>();
     BOOST_REQUIRE( idx.size() == acc_amount );
-    db._son_count_histogram_buffer.resize( 501 );
-    db._son_count_histogram_buffer[0] = max_asset;
-    db._total_voting_stake = max_asset;
+    signed_transaction trx2;
+    set_son_count( db, acc_amount );
     db._vote_tally_buffer.resize( 20 + acc_amount );
     for( auto iter: sons ) {
         db._vote_tally_buffer[iter.first] = acc_amount * asset_amount;
@@ -505,12 +508,12 @@ BOOST_AUTO_TEST_CASE( change_active_sons ){
     }
 
     signed_transaction trx2;
-    trx2.operations.push_back( get_acc_update_op( account.get_id(), account_id_type(1)(db).options, votes, sons_amount ) );
+    trx2.operations.push_back( get_acc_update_op( account.get_id(), account_id_type(1)(db).options, votes ) );
     
     for( uint8_t i = 1; i <= sons_amount; ++i ){
         auto account_id = account_id_type(i);
         // transfer( account_id_type(), account_id, asset( 10000000, asset_id_type() ) );
-        trx2.operations.push_back( get_acc_update_op( account_id, account_id(db).options, votes, sons_amount ) );
+        trx2.operations.push_back( get_acc_update_op( account_id, account_id(db).options, votes ) );
     }
     
     trx2.validate();

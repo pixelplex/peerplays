@@ -20,7 +20,7 @@ namespace graphene { namespace chain {
          account_id_type                  son_member_account;
          vote_id_type                     vote_id;
          uint64_t                         total_votes = 0;
-         int64_t                          deposit = 0;
+         uint64_t                         deposit = 0;
          string                           url;
 
          fc::optional<fc::time_point_sec> time_of_deleting;
